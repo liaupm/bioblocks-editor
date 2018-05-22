@@ -1,0 +1,20 @@
+{
+  "name": "various-scripts",
+  "description": "(Blockly is a library for building visual programming editors.) - rev by buhorl",
+  "main": "blockly_compressed.js",
+  "authors": [
+    "buhorl - rigui@hotmail.es"
+  ],
+  "license": "Apache-2.0",
+  "keywords": [
+    "blockly"
+  ],
+  "homepage": "https://github.com/Buhorl/various-scripts",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
