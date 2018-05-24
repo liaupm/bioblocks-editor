@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+  <!----------------- HEAD ------------------>
+  <head>
+    <meta charset="utf-8">
+    <title>Blockly Demo: Toolbox</title>
+    <script src="../../blockly_compressed.js"></script>
+    <script src="../../blocks_compressed.js"></script>
+    <script src="../../msg/js/en.js"></script>
+    <script src="./custom_code/definitions.js"></script>
+    <script src="blocks.js"></script>
+    <script src="factory_utils.js"></script>
+    <script src="factory.js"></script>
+    <script src="custom.js"></script>
+    <script src="../../tests/jsunit/input_test.js"></script>
+    <style>
+      body {
+        background-color: #fff;
+        font-family: sans-serif;
+      }
+      h1 {
+        font-weight: normal;
+        font-size: 140%;
+      }
+    </style>
+    <script>
+    var blocklyFactory;
+    var init = function() {
+      //blocklyFactory = new MyController();
+      MyController.js_init();
+      BlockFactory.updatePreview();
+    };
+    window.alert("Welcome to the custom editor")
+  </script>
+  </head>
+  <!----------------- BODY ------------------>
+  <body onload="init();">
+    <!------- CONTENTS -------->
+    <h1>Blockly / Bioblocks implementation</h1>
+    <p>This is my demo for a custom toolbox that loads some blocks</p>
+  <table>
+    <tr><td width=100>
+    <h4>Preview:
+      <select id="direction">
+        <option value="ltr">LTR</option>
+        <option value="rtl">RTL</option>
+      </select>
+    </h4>
+    </td>
+    <td width=200>
+    <h4>Block Definition:
+      <select id="format">
+        <option value="JSON">JSON</option>
+        <option value="JavaScript">JavaScript</option>
+        <option value="Manual-JSON">Manual JSON&hellip;</option>
+        <script>
+          if (document.location.href.indexOf('file://') == 0) {
+            document.write(
+                '<option value="Manual-JS">Manual JavaScript&hellip;</option>');
+          }
+        </script>
+      </select>
+    </h4>
+    <td>
+      <h4>Generator stub:
+        <select id="language">
+          <option value="JavaScript">JavaScript</option>
+          <option value="Python">Python</option>
+          <option value="PHP">PHP</option>
+          <option value="Lua">Lua</option>
+          <option value="Dart">Dart</option>
+        </select>
+      </h4>
+    </td></tr>
+  </table>
+    <BUTTON id="custom_button_load">Load code from the workspace to the code-box</BUTTON>
+    <br>
+    <BUTTON id="custom_button_view">Load code from the code-box to the mirror</BUTTON>
+    <br>
+    <table>
+      <tr>
+        <td>
+          <h3>Workspace</h3>
+          <div id="blocklyDiv" style="height: 570px; width: 500px;"></div>
+        </td>
+        <td style="vertical-align:text-top">
+          <h3>Mirror</h3>
+          <div id="preview" style="height: 300px; width: 430px;"></div>
+          <h3>Code-box</h3>
+          <!--readonly-->
+          <textarea  id="languageTA" style="height: 200px; width: 430px;resize:none">
+{
+  "type": "block_type",
+  "message0": "Operación: Thermocycling %1 Container Input %2 Variable: velocidad %3 %4 Variable: tiempo %5 %6 Variable: RPM %7",
+  "args0": [
+    {
+      "type": "input_dummy",
+      "align": "CENTRE"
+    },
+    {
+      "type": "input_value",
+      "name": "NAME",
+      "align": "RIGHT"
+    },
+    {
+      "type": "field_number",
+      "name": "NAME",
+      "value": 0
+    },
+    {
+      "type": "input_dummy"
+    },
+    {
+      "type": "field_number",
+      "name": "NAME",
+      "value": 0
+    },
+    {
+      "type": "input_dummy"
+    },
+    {
+      "type": "field_number",
+      "name": "NAME",
+      "value": 0
+    }
+  ],
+  "inputsInline": false,
+  "previousStatement": null,
+  "nextStatement": null,
+  "colour": 120,
+  "tooltip": "hELLO",
+  "helpUrl": ""
+}
+          </textarea>
+        </td>
+      </tr>
+    </table>
+    <!------- TOOLBOXES -------->
+    <xml id="toolbox" style="display: none">
+      <category name="Input / Output">
+        <block type="source"></block>
+        <block type="destination"></block>
+      </category>
+      <category name="Number Inputs">
+        <block type="numbers_time_of_op">
+          <field name="VALUE">0</field>
+        </block>
+        <block type="numbers_speed">
+          <field name="VALUE">0</field>
+        </block>
+        <block type="numbers_cycles">
+          <field name="VALUE">0</field>
+        </block>
+        <block type="numbers_wavelength">
+          <field name="VALUE">0</field>
+        </block>
+        <block type="numbers_sequence">
+          <field name="VALUE">0</field>
+        </block>
+        <block type="numbers_co2">
+          <field name="VALUE">0</field>
+        </block>
+        <block type="numbers_speed">
+          <field name="VALUE">0</field>
+        </block>
+      </category>
+      <category name="String Inputs">
+        <block type="strings_ladder">
+          <field name="TEXT"> --- </field>
+        </block>
+        <block type="strings_dest">
+          <field name="TEXT"> --- </field>
+        </block>
+        <block type="strings_scale">
+          <field name="TEXT"> --- </field>
+        </block>
+        <block type="strings_purification">
+          <field name="TEXT"> --- </field>
+        </block>
+        <block type="strings_mcc">
+          <field name="TEXT"> --- </field>
+        </block>
+      </category>
+      <category name="Dropdown Menus">
+        <block type="drop_action">
+          <field name="NAME">OPTIONNAME</field>
+        </block>
+        <block type="drop_measure">
+          <field name="NAME">OPTIONNAME</field>
+        </block>
+        <block type="drop_type">
+          <field name="NAME">OPTIONNAME</field>
+        </block>
+        <block type="drop_temp">
+          <field name="NAME">OPTIONNAME</field>
+          <field name="NUMBER">0</field>
+        </block>
+        <block type="drop_duration">
+          <field name="NUMBER">0</field>
+          <field name="NAME">OPTIONNAME</field>
+        </block>
+      </category>
+      <category name="Extra">
+        <block type="new_op">
+          <field name="NAME"> --- </field>
+        </block>
+        <block type="new_op2">
+          <field name="NAME"> --- </field>
+        </block>
+        <block type="extra_settings">
+          <field name="NAME">TRUE</field>
+        </block>
+        <block type="extra_mix_check">
+          <field name="NAME">TRUE</field>
+        </block>
+      </category>
+    </xml>   
+    <xml id="toolbox_2" style="display: none"></xml>
+    <!------- SCRIPTS -------->
+    <script>
+
+    </script>
+    <script>
+      var firstWS = document.getElementById('blocklyDiv')
+      var secondWS = document.getElementById('preview')
+      //No se hace la instanciación porque si no se duplica en la carga desde el codigo
+      /*var secondWS = Blockly.inject('preview',
+        {readOnly: true,
+        media: '../../media/',
+        toolbox: document.getElementById('toolbox')});*/
+      /*var firstWS = Blockly.inject('blocklyDiv',
+        {media: '../../media/',
+        toolbox: document.getElementById('toolbox')});*/
+    </script>
+    <script>
+      // Listen to events on primary workspace.
+      //firstWS.addChangeListener(mirrorEvent);
+    function mirrorEvent(primaryEvent) {
+      if (primaryEvent.type == Blockly.Events.UI) {
+        return;  // Don't mirror UI events.
+      }
+      // Convert event to JSON.  This could then be transmitted across the net.
+      var json = primaryEvent.toJson();
+      console.log(json);
+      // Convert JSON back into an event, then execute it.
+      var secondaryEvent = Blockly.Events.fromJson(json, secondWS);
+      secondaryEvent.run(true);
+    }
+    </script>
+  </body>
+</html>
