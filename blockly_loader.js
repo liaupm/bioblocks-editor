@@ -29,9 +29,10 @@ var options = {
 
 MyController.js_init = function() {
   document.getElementById('custom_button_load').onclick = MyController.translate;  
-  document.getElementById('custom_button_view').onclick = BlockFactory.updatePreview;  
+  document.getElementById('custom_button_view').onclick = MyController.updatePreview;  
   BlockFactory.mainWorkspace = Blockly.inject('blocklyDiv',options);
   MyController.injectCode(JSON.stringify(code_init,null, 2), 'languageTA')
+  MyController.updatePreview();
   window.alert("My JS loaded!")
 }
 
@@ -72,14 +73,14 @@ MyController.translate = function() {
       format = 'JavaScript';
     }
 
-    //var code = MyController.getBlockDefinition(blockType, rootBlock, format);
+    var code = MyController.getBlockDefinition(blockType, rootBlock, format);
     //TODO: Esta es la funcioón a cambiar, la generación de código ha de ser custom para mis bloques. WIP: la de arriba
-    var code = FactoryUtils.getBlockDefinition(blockType, rootBlock, format, BlockFactory.mainWorkspace);
+    //var code = FactoryUtils.getBlockDefinition(blockType, rootBlock, format, BlockFactory.mainWorkspace);
 
     MyController.injectCode(code, 'languageTA');
   }
   //Automaticamente cambiar la vista del bloque cuando se cargue en el bloque(?)
-  BlockFactory.updatePreview();
+  MyController.updatePreview();
 };
 
 MyController.getBlockDefinition = function(blockType, rootBlock, format) {
@@ -102,56 +103,195 @@ MyController.formatJson_ = function(blockType, rootBlock) {
   // Generate inputs.
   var message = [];
   var args = [];
-  var contentsBlock = rootBlock.getChildren()[0]; //gets the first child (and only) the block has
-  var lastInput = null;
-  while (contentsBlock) { //While not null -> we have a block to work with
-    if (!contentsBlock.disabled) {
-      switch(contentsBlock.type) {
-          case "new_op":
-              //code block
-              break;
-          case n:
-              //code block
-              break;
-          default:
-              //code block
-      }
-      contentsBlock = contentsBlock.getChildren()[0]; //gets the first child (and only) the block has
-
-
-      var fields = FactoryUtils.getFieldsJson_(
-          contentsBlock.getInputTargetBlock('FIELDS'));
-      for (var i = 0; i < fields.length; i++) {
-        if (typeof fields[i] == 'string') {
-          message.push(fields[i].replace(/%/g, '%%'));
-        } else {
-          args.push(fields[i]);
-          message.push('%' + args.length);
-        }
-      }
-
-      var input = {type: contentsBlock.type};
-      // Dummy inputs don't have names.  Other inputs do.
-      if (contentsBlock.type != 'input_dummy') {
-        input.name = contentsBlock.getFieldValue('INPUTNAME');
-      }
-      var check = JSON.parse(
-          FactoryUtils.getOptTypesFrom(contentsBlock, 'TYPE') || 'null');
-      if (check) {
-        input.check = check;
-      }
-      var align = contentsBlock.getFieldValue('ALIGN');
-      if (align != 'LEFT') {
-        input.align = align;
-      }
-      args.push(input);
-      message.push('%' + args.length);
-      lastInput = contentsBlock;
+  var i = 1;
+  var block = rootBlock;//.getChildren()[0]; //gets the first child (and only) the block has
+  while (block) { //While not null -> we have a block to work with
+    var fields = [];
+    if (!block.disabled && !block.getInheritedDisabled()) {
+      switch (block.type) {
+        // NUMBER BLOCKS
+        case 'numbers_time_of_op':
+        case 'numbers_speed':
+        case 'numbers_cycles':
+        case 'numbers_wavelength':
+        case 'numbers_sequence':
+        case 'numbers_co2':
+        case 'numbers_speed':
+          var obj = {
+            type: block.type,
+            name: block.getFieldValue('FIELDNAME'),
+            value: parseFloat(block.getFieldValue('VALUE'))
+          };
+            obj.min = 0;
+            obj.max = Infinity;
+            obj.precision = 0;
+          fields.push(obj);
+          break;
+        // STRING BLOCKS
+        case 'strings_ladder':
+        case 'strings_dest':
+        case 'strings_scale':
+        case 'strings_purification':
+        case 'strings_mcc':
+          fields.push({
+            type: block.type,
+            name: "NAME",
+            text: block.getFieldValue("TEXT")
+          });
+          break;
+        // DROPDOWN BLOCKS
+        case 'drop_measure':
+          var options = [
+            [
+              "Abrorbance",
+              "OPTIONNAME"
+            ],
+            [
+              "Fluorescence",
+              "OPTIONNAME"
+            ],
+            [
+              "Luminiscence",
+              "OPTIONNAME"
+            ],
+            [
+              "Volume",
+              "OPTIONNAME"
+            ],
+            [
+              "Temperature",
+              "OPTIONNAME"
+            ]
+          ];
+          fields.push({
+            type: block.type,
+            name: "dropdown",
+            options: options
+          });
+          break;
+        case 'drop_action':
+          var options = [
+            [
+              "Transfer",
+              "OPTIONNAME"
+            ],
+            [
+              "Distribute",
+              "OPTIONNAME"
+            ],
+            [
+              "Consolidate",
+              "OPTIONNAME"
+            ],
+            [
+              "Continuous Transfer",
+              "OPTIONNAME"
+            ]
+          ];
+          fields.push({
+            type: block.type,
+            name: "dropdown",
+            options: options
+          });
+          break;
+        case 'drop_type':
+          var options = [
+            [
+              "Vortex",
+              "OPTIONNAME"
+            ],
+            [
+              "Shake",
+              "OPTIONNAME"
+            ]            
+          ];
+          fields.push({
+            type: block.type,
+            name: "dropdown",
+            options: options
+          });
+          break;
+        case 'drop_temp':
+          var options = [
+          [
+            "Celsius",
+            "OPTIONNAME"
+          ],
+          [
+            "Kelvin",
+            "OPTIONNAME"
+          ]
+          ];
+          fields.push({
+            type: block.type,
+            name: "dropdown",
+            options: options
+          });
+          break;
+        case 'drop_duration':
+          var options = [
+            [
+              "Milliseconds",
+              "OPTIONNAME"
+            ],
+            [
+              "Seconds",
+              "OPTIONNAME"
+            ],
+            [
+              "Minutes",
+              "OPTIONNAME"
+            ],
+            [
+              "Hours",
+              "OPTIONNAME"
+            ]
+          ];
+          fields.push({
+            type: block.type,
+            name: "dropdown",
+            options: options
+          });
+          break;
+        case 'extra_settings':
+        case 'extra_mix_check':
+        case 'new_op': //It does jack shit
+          break;
+        case 'default':
+          window.alert("There has been an error parsing a block: Block not defined!")
+          break;
+      } //Cierre de Switch
+    } //Cierre de IF
+    message.push(block.getFieldValue() + ' %' + i);
+    i = i+1;
+    if (block.type == "new_op"){
+      args.push({
+      "type": "input_dummy",
+      "align": "CENTRE"
+      });
     }
-    contentsBlock = contentsBlock.nextConnection &&
-        contentsBlock.nextConnection.targetBlock();
-  }
+    if (block.type == "source" || "destination"){
+      args.push(fields);
+      args.push({
+      "type": "input_value",
+      "name": "NAME",
+      "align": "RIGHT"
+      });
+    } else {
+      args.push(fields);
+      args.push({
+      "type": "input_dummy"
+      });
+    }
+    message.push('%' + i);
+    i = i+1;
+    block = block.nextConnection && block.nextConnection.targetBlock();
+  }//Cierre del while
+  //contentsBlock = contentsBlock.getChildren()[0]; //gets the first child (and only) the block has
+    //contentsBlock = contentsBlock.nextConnection && contentsBlock.nextConnection.targetBlock();
+  //}
   // Remove last input if dummy and not empty.
+  /*
   if (lastInput && lastInput.type == 'input_dummy') {
     var fields = lastInput.getInputTargetBlock('FIELDS');
     if (fields && FactoryUtils.getFieldsJson_(fields).join('').trim() != '') {
@@ -162,43 +302,22 @@ MyController.formatJson_ = function(blockType, rootBlock) {
       args.pop();
       message.pop();
     }
-  }
+  }*/
   JS.message0 = message.join(' ');
   if (args.length) {
     JS.args0 = args;
   }
-  // Generate inline/external switch.
-  if (rootBlock.getFieldValue('INLINE') == 'EXT') {
-    JS.inputsInline = false;
-  } else if (rootBlock.getFieldValue('INLINE') == 'INT') {
-    JS.inputsInline = true;
-  }
-  // Generate output, or next/previous connections.
-  switch (rootBlock.getFieldValue('CONNECTIONS')) {
-    case 'LEFT':
-      JS.output =
-          JSON.parse(
-              FactoryUtils.getOptTypesFrom(rootBlock, 'OUTPUTTYPE') || 'null');
-      break;
-    case 'BOTH':
-      JS.previousStatement =
-          JSON.parse(
-              FactoryUtils.getOptTypesFrom(rootBlock, 'TOPTYPE') || 'null');
-      JS.nextStatement =
-          JSON.parse(
-              FactoryUtils.getOptTypesFrom(rootBlock, 'BOTTOMTYPE') || 'null');
-      break;
-    case 'TOP':
-      JS.previousStatement =
-          JSON.parse(
-              FactoryUtils.getOptTypesFrom(rootBlock, 'TOPTYPE') || 'null');
-      break;
-    case 'BOTTOM':
-      JS.nextStatement =
-          JSON.parse(
-              FactoryUtils.getOptTypesFrom(rootBlock, 'BOTTOMTYPE') || 'null');
-      break;
-  }
+  // Generate external switch.
+  JS.inputsInline = false;
+  // Generate output, or next/previous connections. Will always be BOTH:
+  //switch (rootBlock.getFieldValue('CONNECTIONS')) {case 'BOTH':
+  JS.previousStatement =
+      JSON.parse(
+          FactoryUtils.getOptTypesFrom(rootBlock, 'TOPTYPE') || 'null');
+  JS.nextStatement =
+      JSON.parse(
+          FactoryUtils.getOptTypesFrom(rootBlock, 'BOTTOMTYPE') || 'null');
+    //break;}
   // Generate colour.
   /*
   var colourBlock = rootBlock.getInputTargetBlock('COLOUR');
@@ -212,6 +331,272 @@ MyController.formatJson_ = function(blockType, rootBlock) {
   JS.colour = rootBlock.getHue();
 
   return JSON.stringify(JS, null, '  ');
+};
+
+MyController.getFieldsJson_ = function(block) {
+  var fields = [];
+  while (block) {
+    if (!block.disabled && !block.getInheritedDisabled()) {
+      switch (block.type) {
+        // NUMBER BLOCKS
+        case 'numbers_time_of_op':
+        case 'numbers_speed':
+        case 'numbers_cycles':
+        case 'numbers_wavelength':
+        case 'numbers_sequence':
+        case 'numbers_co2':
+        case 'numbers_speed':
+          var obj = {
+            type: block.type,
+            name: block.getFieldValue('FIELDNAME'),
+            value: parseFloat(block.getFieldValue('VALUE'))
+          };
+            obj.min = 0;
+            obj.max = Infinity;
+            obj.precision = 0;
+          fields.push(obj);
+          break;
+        // STRING BLOCKS
+        case 'strings_ladder':
+        case 'strings_dest':
+        case 'strings_scale':
+        case 'strings_purification':
+        case 'strings_mcc':
+          fields.push({
+            type: block.type,
+            name: "NAME",
+            text: block.getFieldValue()
+          });
+          break;
+        // DROPDOWN BLOCKS
+        case 'drop_measure':
+          var options = [
+            [
+              "Abrorbance",
+              "OPTIONNAME"
+            ],
+            [
+              "Fluorescence",
+              "OPTIONNAME"
+            ],
+            [
+              "Luminiscence",
+              "OPTIONNAME"
+            ],
+            [
+              "Volume",
+              "OPTIONNAME"
+            ],
+            [
+              "Temperature",
+              "OPTIONNAME"
+            ]
+          ];
+          fields.push({
+            type: block.type,
+            name: "dropdown",
+            options: options
+          });
+          break;
+        case 'drop_action':
+          var options = [
+            [
+              "Transfer",
+              "OPTIONNAME"
+            ],
+            [
+              "Distribute",
+              "OPTIONNAME"
+            ],
+            [
+              "Consolidate",
+              "OPTIONNAME"
+            ],
+            [
+              "Continuous Transfer",
+              "OPTIONNAME"
+            ]
+          ];
+          fields.push({
+            type: block.type,
+            name: "dropdown",
+            options: options
+          });
+          break;
+        case 'drop_type':
+          var options = [
+            [
+              "Vortex",
+              "OPTIONNAME"
+            ],
+            [
+              "Shake",
+              "OPTIONNAME"
+            ]            
+          ];
+          fields.push({
+            type: block.type,
+            name: "dropdown",
+            options: options
+          });
+          break;
+        case 'drop_temp':
+          var options = [
+          [
+            "Celsius",
+            "OPTIONNAME"
+          ],
+          [
+            "Kelvin",
+            "OPTIONNAME"
+          ]
+          ];
+          fields.push({
+            type: block.type,
+            name: "dropdown",
+            options: options
+          });
+          break;
+        case 'drop_duration':
+          var options = [
+            [
+              "Milliseconds",
+              "OPTIONNAME"
+            ],
+            [
+              "Seconds",
+              "OPTIONNAME"
+            ],
+            [
+              "Minutes",
+              "OPTIONNAME"
+            ],
+            [
+              "Hours",
+              "OPTIONNAME"
+            ]
+          ];
+          fields.push({
+            type: block.type,
+            name: "dropdown",
+            options: options
+          });
+          break;
+        case 'extra_settings':
+        case 'extra_mix_check':
+        case 'default':
+          window.alert("There has been an error parsing a block: Block not defined!")
+          break;
+      }
+    }
+    block = block.nextConnection && block.nextConnection.targetBlock();
+  }
+  return fields;
+};
+
+
+MyController.updatePreview = function() {
+  // Toggle between LTR/RTL if needed (also used in first display).
+  var newDir = document.getElementById('direction').value;
+  if (BlockFactory.oldDir != newDir) {
+    if (BlockFactory.previewWorkspace) {
+      BlockFactory.previewWorkspace.dispose();
+    }
+    var rtl = newDir == 'rtl';
+    BlockFactory.previewWorkspace = Blockly.inject('preview',
+        {rtl: rtl,
+         media : 'https://blockly-demo.appspot.com/static/media/', 
+         scrollbars: true});
+    BlockFactory.oldDir = newDir;
+  }
+  BlockFactory.previewWorkspace.clear();
+
+  var format = BlockFactory.getBlockDefinitionFormat();
+  var code = document.getElementById('languageTA').value;
+  if (!code.trim()) {
+    // Nothing to render.  Happens while cloud storage is loading.
+    return;
+  }
+
+  // Backup Blockly.Blocks object so that main workspace and preview don't
+  // collide if user creates a 'factory_base' block, for instance.
+  var backupBlocks = Blockly.Blocks;
+  try {
+    // Make a shallow copy.
+    Blockly.Blocks = Object.create(null);
+    for (var prop in backupBlocks) {
+      Blockly.Blocks[prop] = backupBlocks[prop];
+    }
+
+    if (format == 'JSON') {
+      var json = JSON.parse(code);
+      Blockly.Blocks[json.type || BlockFactory.UNNAMED] = {
+        init: function() {
+          this.jsonInit(json);
+        }
+      };
+    } else if (format == 'JavaScript') {
+      try {
+        eval(code);
+      } catch (e) {
+        // TODO: Display error in the UI
+        console.error("Error while evaluating JavaScript formatted block definition", e);
+        return;
+      }
+    }
+
+    // Look for a block on Blockly.Blocks that does not match the backup.
+    var blockType = null;
+    for (var type in Blockly.Blocks) {
+      if (typeof Blockly.Blocks[type].init == 'function' &&
+          Blockly.Blocks[type] != backupBlocks[type]) {
+        blockType = type;
+        break;
+      }
+    }
+    if (!blockType) {
+      return;
+    }
+
+    // Create the preview block.
+    var previewBlock = BlockFactory.previewWorkspace.newBlock(blockType);
+    previewBlock.initSvg();
+    previewBlock.render();
+    previewBlock.setMovable(false);
+    previewBlock.setDeletable(false);
+    previewBlock.moveBy(15, 10);
+    BlockFactory.previewWorkspace.clearUndo();
+    //MyController.updateGenerator(previewBlock);
+
+    // Warn user only if their block type is already exists in Blockly's
+    // standard library.
+    var rootBlock = FactoryUtils.getRootBlock(BlockFactory.mainWorkspace);
+    if (rootBlock){
+          if (blockType == 'block_type') {
+      // Warn user to let them know they can't save a block under the default
+      // name 'block_type'
+      rootBlock.setWarningText('You cannot save a block with the default ' +
+          'name, "block_type"');
+
+    } else {
+      rootBlock.setWarningText(null);
+    }
+    }
+
+  } catch(err) {
+    // TODO: Show error on the UI
+    console.log(err);
+    BlockFactory.updateBlocksFlag = false
+    BlockFactory.updateBlocksFlagDelayed = false
+  } finally {
+    Blockly.Blocks = backupBlocks;
+  }
+};
+
+MyController.updateGenerator = function(block) {
+  var language = document.getElementById('language').value;
+  var generatorStub = FactoryUtils.getGeneratorStub(block, language);
+  MyController.injectCode(generatorStub, 'generatorPre');
 };
 
 var code_init = {

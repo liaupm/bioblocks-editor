@@ -50,7 +50,7 @@ Blockly.defineBlocksWithJsonArray([ // BEGIN JSON EXTRACT
   "args0": [
     {
       "type": "field_number",
-      "name": "NAME",
+      "name": "VALUE",
       "value": 0
     }
   ],
@@ -440,11 +440,9 @@ Blockly.defineBlocksWithJsonArray([ // BEGIN JSON EXTRACT
     },
     {
       "type": "input_statement",
-      "name": "FIELD"
+      "name": "FIELDS"
     }
   ],
-  "previousStatement": null,
-  "nextStatement": null,
   "colour": 120,
   "tooltip": "Block to create a new Bioblock Operation",
   "helpUrl": ""
