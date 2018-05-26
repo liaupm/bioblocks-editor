@@ -263,7 +263,7 @@ Blockly.defineBlocksWithJsonArray([ // BEGIN JSON EXTRACT
 },
 {
   "type": "drop_action",
-  "message0": " %1",
+  "message0": "  %1",
   "args0": [
     {
       "type": "field_dropdown",
@@ -428,7 +428,7 @@ Blockly.defineBlocksWithJsonArray([ // BEGIN JSON EXTRACT
 },
 {
   "type": "new_op",
-  "message0": "New Operation %1 %2 %3",
+  "message0": "Operation: %1 %2 %3",
   "args0": [
     {
       "type": "field_input",

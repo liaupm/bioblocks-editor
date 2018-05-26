@@ -107,7 +107,7 @@ MyController.formatJson_ = function(blockType, rootBlock) {
   var block = rootBlock;//.getChildren()[0]; //gets the first child (and only) the block has
   while (block) { //While not null -> we have a block to work with
     var fields = [];
-    if (!block.disabled && !block.getInheritedDisabled()) {
+    if (!block.disabled/* && !block.getInheritedDisabled()*/) {
       switch (block.type) {
         // NUMBER BLOCKS
         case 'numbers_time_of_op':
@@ -118,13 +118,13 @@ MyController.formatJson_ = function(blockType, rootBlock) {
         case 'numbers_co2':
         case 'numbers_speed':
           var obj = {
-            type: block.type,
-            name: block.getFieldValue('FIELDNAME'),
+            type: "field_number",//block.type,
+            name: "NAME",
             value: parseFloat(block.getFieldValue('VALUE'))
           };
             obj.min = 0;
-            obj.max = Infinity;
-            obj.precision = 0;
+            //obj.max = Infinity;
+            //obj.precision = 0;
           fields.push(obj);
           break;
         // STRING BLOCKS
@@ -134,7 +134,7 @@ MyController.formatJson_ = function(blockType, rootBlock) {
         case 'strings_purification':
         case 'strings_mcc':
           fields.push({
-            type: block.type,
+            type: "field_input",//block.type,
             name: "NAME",
             text: block.getFieldValue("TEXT")
           });
@@ -164,7 +164,7 @@ MyController.formatJson_ = function(blockType, rootBlock) {
             ]
           ];
           fields.push({
-            type: block.type,
+            type: "field_dropdown",//block.type,
             name: "dropdown",
             options: options
           });
@@ -189,7 +189,7 @@ MyController.formatJson_ = function(blockType, rootBlock) {
             ]
           ];
           fields.push({
-            type: block.type,
+            type: "field_dropdown",//block.type,
             name: "dropdown",
             options: options
           });
@@ -206,7 +206,7 @@ MyController.formatJson_ = function(blockType, rootBlock) {
             ]            
           ];
           fields.push({
-            type: block.type,
+            type: "field_dropdown",//"field_dropdown",//block.type,
             name: "dropdown",
             options: options
           });
@@ -223,12 +223,24 @@ MyController.formatJson_ = function(blockType, rootBlock) {
           ]
           ];
           fields.push({
-            type: block.type,
+            type: "field_dropdown",//block.type,
             name: "dropdown",
             options: options
           });
+          var obj = {
+            type: "field_number",//block.type,
+            name: "NAME",
+            value: parseFloat(block.getFieldValue('NUMBER'))
+          };
+          fields.push(obj);
           break;
         case 'drop_duration':
+          var obj = {
+            type: "field_number",//block.type,
+            name: "NAME",
+            value: parseFloat(block.getFieldValue('NUMBER'))
+          };
+          fields.push(obj);
           var options = [
             [
               "Milliseconds",
@@ -248,46 +260,69 @@ MyController.formatJson_ = function(blockType, rootBlock) {
             ]
           ];
           fields.push({
-            type: block.type,
+            type: "field_dropdown",//block.type,
             name: "dropdown",
             options: options
           });
           break;
-        case 'extra_settings':
         case 'extra_mix_check':
+
+        //case 'extra_settings': //Temporally disabled
         case 'new_op': //It does jack shit
+          fields.push({
+            type: "field_checkbox",//block.type,
+            name: "check",
+            checked: true
+          });
           break;
         case 'default':
           window.alert("There has been an error parsing a block: Block not defined!")
           break;
       } //Cierre de Switch
     } //Cierre de IF
-    message.push(block.getFieldValue() + ' %' + i);
-    i = i+1;
+    
     if (block.type == "new_op"){
+      message.push(block.getFieldValue() + ' ' + block.getFieldValue('NAME') + ' %' + i);
+      i = i+1;
       args.push({
       "type": "input_dummy",
       "align": "CENTRE"
       });
-    }
-    if (block.type == "source" || "destination"){
-      args.push(fields);
+    } else if (block.type == "source" || block.type == "destination"){
+      message.push(block.getFieldValue() + ' %' + i);
+      i = i+1;
+      //args.push(fields[0]);
       args.push({
       "type": "input_value",
       "name": "NAME",
       "align": "RIGHT"
       });
-    } else {
-      args.push(fields);
+      //message.push('%' + i);
+      //i = i+1;
+    } else if (block.type == "drop_temp" ||  block.type == "drop_duration"){
+      message.push(block.getFieldValue() + ' %' + i + ' %' + (i+1));
+      i = i+2;
+      args.push(fields[0]);
+      args.push(fields[1]);
       args.push({
       "type": "input_dummy"
       });
+      message.push('%' + i);
+      i = i+1;
+    } else {
+      message.push(block.getFieldValue() + ' %' + i);
+      i = i+1;
+      args.push(fields[0]);
+      args.push({
+      "type": "input_dummy"
+      });
+      message.push('%' + i);
+      i = i+1;
     }
-    message.push('%' + i);
-    i = i+1;
-    block = block.nextConnection && block.nextConnection.targetBlock();
+    //block = block.nextConnection && block.nextConnection.targetBlock(); doesn't seem to work, so instead we use:
+    block = block.getChildren()[0]; //gets the first child (and only) the block has
   }//Cierre del while
-  //contentsBlock = contentsBlock.getChildren()[0]; //gets the first child (and only) the block has
+  
     //contentsBlock = contentsBlock.nextConnection && contentsBlock.nextConnection.targetBlock();
   //}
   // Remove last input if dummy and not empty.
