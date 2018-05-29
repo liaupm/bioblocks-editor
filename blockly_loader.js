@@ -9,7 +9,7 @@ goog.require('goog.dom.classlist');
 goog.require('goog.ui.PopupColorPicker');
 goog.require('goog.ui.ColorPicker');
 
-var myowntoolbox = '<xml id="toolbox" style="display: none"> <category name="Input / Output">         <block type="source"></block>         <block type="destination"></block>       </category>       <category name="Number Inputs">         <block type="numbers_time_of_op">           <field name="VALUE">0</field>         </block>         <block type="numbers_speed">           <field name="VALUE">0</field>         </block>         <block type="numbers_cycles">           <field name="VALUE">0</field>         </block>         <block type="numbers_wavelength">           <field name="VALUE">0</field>         </block>         <block type="numbers_sequence">           <field name="VALUE">0</field>         </block>         <block type="numbers_co2">           <field name="VALUE">0</field>         </block>         <block type="numbers_speed">           <field name="VALUE">0</field>         </block>       </category>       <category name="String Inputs">         <block type="strings_ladder">           <field name="TEXT"> --- </field>         </block>         <block type="strings_dest">           <field name="TEXT"> --- </field>         </block>         <block type="strings_scale">           <field name="TEXT"> --- </field>         </block>         <block type="strings_purification">           <field name="TEXT"> --- </field>         </block>         <block type="strings_mcc">           <field name="TEXT"> --- </field>         </block>       </category>       <category name="Dropdown Menus">         <block type="drop_action">           <field name="NAME">OPTIONNAME</field>         </block>         <block type="drop_measure">           <field name="NAME">OPTIONNAME</field>         </block>         <block type="drop_type">           <field name="NAME">OPTIONNAME</field>         </block>         <block type="drop_temp">           <field name="NAME">OPTIONNAME</field>           <field name="NUMBER">0</field>         </block>         <block type="drop_duration">           <field name="NUMBER">0</field>           <field name="NAME">OPTIONNAME</field>         </block>       </category>       <category name="Extra">         <block type="new_op">           <field name="NAME"> --- </field>         </block>         <block type="extra_settings">           <field name="NAME">TRUE</field>         </block>         <block type="extra_mix_check">           <field name="NAME">TRUE</field>         </block>       </category>     </xml>   ';
+var myowntoolbox = '<xml xmlns="http://www.w3.org/1999/xhtml" id="toolbox" style="display: none;">  <category name="Input / Output">    <block type="source"></block>    <block type="destination"></block>  </category>  <category name="Number Inputs">    <block type="numbers_var">      <field name="NAME">Variable</field>      <field name="VALUE">0</field>    </block>    <block type="numbers_time_of_op">      <field name="VALUE">0</field>    </block>    <block type="numbers_speed">      <field name="VALUE">0</field>    </block>    <block type="numbers_cycles">      <field name="VALUE">0</field>    </block>    <block type="numbers_wavelength">      <field name="VALUE">0</field>    </block>    <block type="numbers_sequence">      <field name="VALUE">0</field>    </block>    <block type="numbers_co2">      <field name="VALUE">0</field>    </block>  </category>  <category name="String Inputs">    <block type="string_var">      <field name="NAME">Variable</field>      <field name="TEXT"> --- </field>    </block>    <block type="strings_ladder">      <field name="TEXT"> --- </field>    </block>    <block type="strings_dest">      <field name="TEXT"> --- </field>    </block>    <block type="strings_scale">      <field name="TEXT"> --- </field>    </block>    <block type="strings_purification">      <field name="TEXT"> --- </field>    </block>    <block type="strings_mcc">      <field name="TEXT"> --- </field>    </block>  </category>  <category name="Dropdown Menus">    <block type="field_dropdown">      <field name="NAME">OPTIONNAME</field>    </block>    <block type="drop_action">      <field name="NAME">OPTIONNAME</field>    </block>    <block type="drop_measure">      <field name="NAME">OPTIONNAME</field>    </block>    <block type="drop_type">      <field name="NAME">OPTIONNAME</field>    </block>    <block type="drop_temp">      <field name="NAME">OPTIONNAME</field>      <field name="NUMBER">0</field>    </block>    <block type="drop_duration">      <field name="NUMBER">0</field>      <field name="NAME">OPTIONNAME</field>    </block>  </category>  <category name="Extra">    <!--<block type="new_op">      <field name="NAME"> OPERATION_NAME </field>    </block>    <block type="extra_settings">      <field name="NAME">TRUE</field>    </block> -->   <block type="extra_mix_check">      <field name="NAME">TRUE</field>    </block>    <block type="check_var">      <field name="NAME">Variable</field>    </block>  </category></xml>';
 var options = { 
   toolbox : myowntoolbox, 
   collapse : true, 
@@ -26,6 +26,11 @@ var options = {
   sounds : true, 
   oneBasedIndex : true
 };
+var block_name = 'block_type';
+var defined_blocks = Object.keys(Blockly.Blocks);
+
+MyController.STARTER_BLOCK_XML_TEXT = '<xml><block type="new_op" ' +
+    'deletable="false" movable="false"></block></xml>';
 
 MyController.js_init = function() {
   document.getElementById('custom_button_load').onclick = MyController.translate;  
@@ -34,7 +39,14 @@ MyController.js_init = function() {
   MyController.injectCode(JSON.stringify(code_init,null, 2), 'languageTA')
   MyController.updatePreview();
   window.alert("My JS loaded!")
+  MyController.showStarterBlock();
 }
+
+MyController.showStarterBlock = function() {
+  BlockFactory.mainWorkspace.clear();
+  var xml = Blockly.Xml.textToDom(MyController.STARTER_BLOCK_XML_TEXT);
+  Blockly.Xml.domToWorkspace(xml, BlockFactory.mainWorkspace);
+};
 
 MyController.injectCode = function(code, id) {
   var pre = document.getElementById(id);
@@ -103,12 +115,53 @@ MyController.formatJson_ = function(blockType, rootBlock) {
   // Generate inputs.
   var message = [];
   var args = [];
-  var i = 1;
+  var message_i = 1;
   var block = rootBlock;//.getChildren()[0]; //gets the first child (and only) the block has
   while (block) { //While not null -> we have a block to work with
     var fields = [];
     if (!block.disabled/* && !block.getInheritedDisabled()*/) {
       switch (block.type) {
+        //WIP BLOCKS:
+        case 'field_dropdown':
+          var options = [];
+          for (var i = 0; i < block.optionList_.length; i++) {
+            options[i] = [block.getUserData(i),
+                block.getFieldValue('CPU' + i)];
+          }
+          if (options.length) {
+            fields.push({
+              type: block.type,
+              name: block.getFieldValue('FIELDNAME'),
+              options: options
+            });
+          }
+          break;
+          //VARS:
+        case 'numbers_var':    
+        var obj = {
+            type: "field_number",//block.type,
+            name: "NAME",
+            value: parseFloat(block.getFieldValue('VALUE'))
+          };
+            obj.min = 0;
+            //obj.max = Infinity;
+            //obj.precision = 0;
+          fields.push(obj);
+          break;
+        case 'string_var':  
+          fields.push({
+            type: "field_input",//block.type,
+            name: "NAME",
+            text: block.getFieldValue("TEXT")
+          });
+          break;
+        case 'check_var':
+          fields.push({
+            type: "field_checkbox",//block.type,
+            name: "CHECK",
+            checked: true
+          });
+          break;
         // NUMBER BLOCKS
         case 'numbers_time_of_op':
         case 'numbers_speed':
@@ -266,60 +319,72 @@ MyController.formatJson_ = function(blockType, rootBlock) {
           });
           break;
         case 'extra_mix_check':
-
-        //case 'extra_settings': //Temporally disabled
-        case 'new_op': //It does jack shit
           fields.push({
             type: "field_checkbox",//block.type,
             name: "check",
             checked: true
           });
           break;
+        //case 'extra_settings': //Temporally disabled
+        case 'new_op': //It does jack shit
+          break;
         case 'default':
           window.alert("There has been an error parsing a block: Block not defined!")
           break;
       } //Cierre de Switch
     } //Cierre de IF
-    
-    if (block.type == "new_op"){
-      message.push(block.getFieldValue() + ' ' + block.getFieldValue('NAME') + ' %' + i);
-      i = i+1;
+    // Comprobaciones según el tipo de bloque de lo que haya que insertar en el cuerpo del bloque:
+
+    //New Operation special text
+    if (block.type == "new_op"){ 
+      message.push(block.getFieldValue() + ' ' + block.getFieldValue('NAME') + ' %' + message_i);
+      message_i = message_i+1;
       args.push({
       "type": "input_dummy",
       "align": "CENTRE"
       });
-    } else if (block.type == "source" || block.type == "destination"){
-      message.push(block.getFieldValue() + ' %' + i);
-      i = i+1;
-      //args.push(fields[0]);
+      block_name = block.getFieldValue('NAME');
+    } //Blocks that have a "null" value on it's body
+    else if (block.type == "check_var"|| block.type == "string_var" || block.type == "numbers_var" || block.type == "field_dropdown" || block.type == "drop_action" ){
+      message.push((block.getFieldValue('NAME')||block.getFieldValue('FIELDNAME')) + ' %' + message_i);
+      message_i = message_i+1;
+      args.push(fields[0]);
+      args.push({
+      "type": "input_dummy"
+      });
+      message.push('%' + message_i);
+      message_i = message_i+1;
+    } //Blocks that have to go to the right and have a notch
+    else if (block.type == "source" || block.type == "destination"){
+      message.push(block.getFieldValue() + ' %' + message_i);
+      message_i = message_i+1;
       args.push({
       "type": "input_value",
       "name": "NAME",
       "align": "RIGHT"
       });
-      //message.push('%' + i);
-      //i = i+1;
-    } else if (block.type == "drop_temp" ||  block.type == "drop_duration"){
-      message.push(block.getFieldValue() + ' %' + i + ' %' + (i+1));
-      i = i+2;
+    } //Blocks that have 2 fields to be pushed
+    else if (block.type == "drop_temp" ||  block.type == "drop_duration" ){
+      message.push((block.getFieldValue()||"") + ' %' + message_i + ' %' + (message_i+1));
+      message_i = message_i+2;
       args.push(fields[0]);
       args.push(fields[1]);
       args.push({
       "type": "input_dummy"
       });
-      message.push('%' + i);
-      i = i+1;
-    } else {
-      message.push(block.getFieldValue() + ' %' + i);
-      i = i+1;
+      message.push('%' + message_i);
+      message_i = message_i+1;
+    } //Normal Blocks
+    else { 
+      message.push(block.getFieldValue() + ' %' + message_i);
+      message_i = message_i+1;
       args.push(fields[0]);
       args.push({
       "type": "input_dummy"
       });
-      message.push('%' + i);
-      i = i+1;
+      message.push('%' + message_i);
+      message_i = message_i+1;
     }
-    //block = block.nextConnection && block.nextConnection.targetBlock(); doesn't seem to work, so instead we use:
     block = block.getChildren()[0]; //gets the first child (and only) the block has
   }//Cierre del while
   
@@ -634,6 +699,14 @@ MyController.updateGenerator = function(block) {
   MyController.injectCode(generatorStub, 'generatorPre');
 };
 
+MyController.addToBlockly = function(block, code) {
+  Blockly.Blocks[block] = code;
+};
+
+MyController.addToBlockly = function(block, code) {
+  Blockly.Blocks[block] = code;
+};
+
 var code_init = {
   "type": "block_type",
   "message0": "Operación: Thermocycling %1 Container Input %2 Variable: velocidad %3 %4 Variable: tiempo %5 %6 Variable: RPM %7",
@@ -676,3 +749,4 @@ var code_init = {
   "tooltip": "hELLO",
   "helpUrl": ""
 };
+

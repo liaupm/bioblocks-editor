@@ -4,46 +4,54 @@
     <block type="destination"></block>
   </category>
   <category name="Number Inputs">
+    <block type="numbers_var">
+      <field name="NAME">Variable</field>
+      <field name="VALUE">0</field>
+    </block>
     <block type="numbers_time_of_op">
-      <field name="NAME">0</field>
+      <field name="VALUE">0</field>
     </block>
     <block type="numbers_speed">
-      <field name="NAME">0</field>
+      <field name="VALUE">0</field>
     </block>
     <block type="numbers_cycles">
-      <field name="NAME">0</field>
+      <field name="VALUE">0</field>
     </block>
     <block type="numbers_wavelength">
-      <field name="NAME">0</field>
+      <field name="VALUE">0</field>
     </block>
     <block type="numbers_sequence">
-      <field name="NAME">0</field>
+      <field name="VALUE">0</field>
     </block>
     <block type="numbers_co2">
-      <field name="NAME">0</field>
-    </block>
-    <block type="numbers_speed">
-      <field name="NAME">0</field>
+      <field name="VALUE">0</field>
     </block>
   </category>
   <category name="String Inputs">
+    <block type="string_var">
+      <field name="NAME">Variable</field>
+      <field name="TEXT"> --- </field>
+    </block>
     <block type="strings_ladder">
-      <field name="NAME"> --- </field>
+      <field name="TEXT"> --- </field>
     </block>
     <block type="strings_dest">
-      <field name="NAME"> --- </field>
+      <field name="TEXT"> --- </field>
     </block>
     <block type="strings_scale">
-      <field name="NAME"> --- </field>
+      <field name="TEXT"> --- </field>
     </block>
     <block type="strings_purification">
-      <field name="NAME"> --- </field>
+      <field name="TEXT"> --- </field>
     </block>
     <block type="strings_mcc">
-      <field name="NAME"> --- </field>
+      <field name="TEXT"> --- </field>
     </block>
   </category>
   <category name="Dropdown Menus">
+    <block type="field_dropdown">
+      <field name="NAME">OPTIONNAME</field>
+    </block>
     <block type="drop_action">
       <field name="NAME">OPTIONNAME</field>
     </block>
@@ -63,14 +71,17 @@
     </block>
   </category>
   <category name="Extra">
-    <block type="new_op">
-      <field name="NAME"> --- </field>
+    <!--<block type="new_op">
+      <field name="NAME"> OPERATION_NAME </field>
     </block>
     <block type="extra_settings">
       <field name="NAME">TRUE</field>
-    </block>
+    </block>-->
     <block type="extra_mix_check">
       <field name="NAME">TRUE</field>
+    </block>
+    <block type="check_var">
+      <field name="NAME">Variable</field>
     </block>
   </category>
 </xml>
