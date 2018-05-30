@@ -14,7 +14,6 @@
     <script src="plugins/jquery-3.3.1.js"></script>
     <script src="components/editor.js"></script>
     <script src="blockly_loader.js"></script>
-
     <style>
       body {
         background-color: #fff;
@@ -25,7 +24,6 @@
         font-size: 140%;
       }
     </style>
-
   </head>
   <!----------------- BODY ------------------>
   <body onload="init();">
@@ -67,28 +65,41 @@
       </h4>
     </td></tr>
   </table>
-    <BUTTON id="custom_button_load">Load code from the workspace to the code-box</BUTTON>
-    <br>
-    <BUTTON id="custom_button_view">Load code from the code-box to the mirror</BUTTON>
-    <br>
-    <table>
-      <tr>
-        <td>
-          <h3>Workspace</h3>
-          <div id="blocklyDiv" style="height: 570px; width: 500px;"></div>
-        </td>
-        <td style="vertical-align:text-top">
-          <h3>Mirror</h3>
-          <div id="preview" style="height: 300px; width: 430px;"></div>
-          <h3>Code-box</h3>
-          <textarea id="languageTA" style="height: 200px; width: 430px;resize:none">Initial empty space: waiting for some code</textarea>
-        </td>
-      </tr>
-    </table>
+  <table>
+    <tr>
+      <td width=310>   
+      <BUTTON style="width:300px" id="custom_button_load">Load code from the workspace to the code-box</BUTTON>
+      <br>
+      <BUTTON style="width:300px" id="custom_button_view">Load code from the code-box to the mirror</BUTTON>
+      </td>
+      <td>
+      <BUTTON style="width:100px" id="custom_saveblock">Save Block</BUTTON>
+      <br>
+      <BUTTON style="width:100px" id="custom_deleteblock">Delete Block</BUTTON>
+      </td>
+    </tr>
+  </table>
+  <br>
+  <table>
+    <tr>
+      <td>
+        <h3>Workspace</h3>
+        <div id="blocklyDiv" style="height: 570px; width: 500px;"></div>
+      </td>
+      <td style="vertical-align:text-top">
+        <h3>Mirror</h3>
+        <div id="preview" style="height: 300px; width: 430px;"></div>
+        <h3>Code-box</h3>
+        <textarea id="languageTA" style="height: 200px; width: 430px;resize:none">Initial empty space: waiting for some code</textarea>
+      </td>
+    </tr>
+  </table>
+  <h3>BioBlocks</h3>
+  <div id="bioblocksDiv" style="height: 570px; width: 935px;"></div>
     <!------- TOOLBOXES -------->
-    <xml id="toolbox_1" style="display: none">This toolbox gets automatically loaded, deprecated</xml>   
+  <xml id="toolbox_1" style="display: none">This toolbox gets automatically loaded, deprecated</xml>   
     <!------- SCRIPTS -------->
-        <script>
+  <script>
     var blocklyFactory;
     var init = function() {
       //blocklyFactory = new MyController();
@@ -96,37 +107,5 @@
     };
     window.alert("Welcome to the custom editor")
   </script>
-    <!--
-    <script>
-
-    </script>
-    <script>
-      var firstWS = document.getElementById('blocklyDiv')
-      var secondWS = document.getElementById('preview')
-      //No se hace la instanciación porque si no se duplica en la carga desde el codigo
-      /*var secondWS = Blockly.inject('preview',
-        {readOnly: true,
-        media: '../../media/',
-        toolbox: document.getElementById('toolbox')});*/
-      /*var firstWS = Blockly.inject('blocklyDiv',
-        {media: '../../media/',
-        toolbox: document.getElementById('toolbox')});*/
-    </script>
-    <script>
-      // Listen to events on primary workspace.
-      //firstWS.addChangeListener(mirrorEvent);
-    function mirrorEvent(primaryEvent) {
-      if (primaryEvent.type == Blockly.Events.UI) {
-        return;  // Don't mirror UI events.
-      }
-      // Convert event to JSON.  This could then be transmitted across the net.
-      var json = primaryEvent.toJson();
-      console.log(json);
-      // Convert JSON back into an event, then execute it.
-      var secondaryEvent = Blockly.Events.fromJson(json, secondWS);
-      secondaryEvent.run(true);
-    }
-    </script>
-  -->
   </body>
 </html>

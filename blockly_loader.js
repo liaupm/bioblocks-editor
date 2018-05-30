@@ -9,43 +9,113 @@ goog.require('goog.dom.classlist');
 goog.require('goog.ui.PopupColorPicker');
 goog.require('goog.ui.ColorPicker');
 
-var myowntoolbox = '<xml xmlns="http://www.w3.org/1999/xhtml" id="toolbox" style="display: none;">  <category name="Input / Output">    <block type="source"></block>    <block type="destination"></block>  </category>  <category name="Number Inputs">    <block type="numbers_var">      <field name="NAME">Variable</field>      <field name="VALUE">0</field>    </block>    <block type="numbers_time_of_op">      <field name="VALUE">0</field>    </block>    <block type="numbers_speed">      <field name="VALUE">0</field>    </block>    <block type="numbers_cycles">      <field name="VALUE">0</field>    </block>    <block type="numbers_wavelength">      <field name="VALUE">0</field>    </block>    <block type="numbers_sequence">      <field name="VALUE">0</field>    </block>    <block type="numbers_co2">      <field name="VALUE">0</field>    </block>  </category>  <category name="String Inputs">    <block type="string_var">      <field name="NAME">Variable</field>      <field name="TEXT"> --- </field>    </block>    <block type="strings_ladder">      <field name="TEXT"> --- </field>    </block>    <block type="strings_dest">      <field name="TEXT"> --- </field>    </block>    <block type="strings_scale">      <field name="TEXT"> --- </field>    </block>    <block type="strings_purification">      <field name="TEXT"> --- </field>    </block>    <block type="strings_mcc">      <field name="TEXT"> --- </field>    </block>  </category>  <category name="Dropdown Menus">    <block type="field_dropdown">      <field name="NAME">OPTIONNAME</field>    </block>    <block type="drop_action">      <field name="NAME">OPTIONNAME</field>    </block>    <block type="drop_measure">      <field name="NAME">OPTIONNAME</field>    </block>    <block type="drop_type">      <field name="NAME">OPTIONNAME</field>    </block>    <block type="drop_temp">      <field name="NAME">OPTIONNAME</field>      <field name="NUMBER">0</field>    </block>    <block type="drop_duration">      <field name="NUMBER">0</field>      <field name="NAME">OPTIONNAME</field>    </block>  </category>  <category name="Extra">    <!--<block type="new_op">      <field name="NAME"> OPERATION_NAME </field>    </block>    <block type="extra_settings">      <field name="NAME">TRUE</field>    </block> -->   <block type="extra_mix_check">      <field name="NAME">TRUE</field>    </block>    <block type="check_var">      <field name="NAME">Variable</field>    </block>  </category></xml>';
-var options = { 
-  toolbox : myowntoolbox, 
-  collapse : true, 
-  comments : true, 
-  disable : true, 
-  maxBlocks : Infinity, 
-  trashcan : true, 
-  horizontalLayout : false, 
-  toolboxPosition : 'start',
-  css : true, 
-  media : 'https://blockly-demo.appspot.com/static/media/', 
-  rtl : false, 
-  scrollbars : true, 
-  sounds : true, 
-  oneBasedIndex : true
+//To remove elements by value, not position
+Array.prototype.remove_by_v = function() {
+    var what, a = arguments, L = a.length, ax;
+    while (L && this.length) {
+        what = a[--L];
+        while ((ax = this.indexOf(what)) !== -1) {
+            this.splice(ax, 1);
+        }
+    }
+    return this;
 };
-var block_name = 'block_type';
-var defined_blocks = Object.keys(Blockly.Blocks);
 
 MyController.STARTER_BLOCK_XML_TEXT = '<xml><block type="new_op" ' +
     'deletable="false" movable="false"></block></xml>';
 
 MyController.js_init = function() {
   document.getElementById('custom_button_load').onclick = MyController.translate;  
-  document.getElementById('custom_button_view').onclick = MyController.updatePreview;  
+  document.getElementById('custom_button_view').onclick = MyController.updatePreview; 
+  document.getElementById('custom_saveblock').onclick = MyController.saveBlock;  
+  document.getElementById('custom_deleteblock').onclick = MyController.deleteBlock;  
   BlockFactory.mainWorkspace = Blockly.inject('blocklyDiv',options);
-  MyController.injectCode(JSON.stringify(code_init,null, 2), 'languageTA')
+  BlockFactory.otherWorkspace = Blockly.inject('bioblocksDiv',bboptions);
+  BlockFactory.mainWorkspace.addChangeListener(MyController.translate);
+  MyController.injectCode(JSON.stringify(code_init,null, 2), 'languageTA'); //"premade" code to be displayed
   MyController.updatePreview();
-  window.alert("My JS loaded!")
   MyController.showStarterBlock();
-}
+  window.alert("My JS loaded!");
+};
 
 MyController.showStarterBlock = function() {
   BlockFactory.mainWorkspace.clear();
   var xml = Blockly.Xml.textToDom(MyController.STARTER_BLOCK_XML_TEXT);
   Blockly.Xml.domToWorkspace(xml, BlockFactory.mainWorkspace);
+};
+
+MyController.deleteBlock = function() {
+  let to_be_deleted = prompt("What block that you created do you want to delete?");
+  if (defined_blocks.includes(to_be_deleted)){
+    //Block has the name of a breviously defined block
+    window.alert('The name of the block is a reserved one. Please only choose one of your custom blocks.');
+    return;
+  } else {
+    if (custom_blocks.includes(to_be_deleted)){
+      window.alert(to_be_deleted + 'will be deleted.');
+      custom_blocks.remove_by_v(to_be_deleted);
+      return;
+    } else {
+    window.alert(to_be_deleted + ' is not the name of a custom block, please check it and try again.');
+    return; }
+  }
+  return;
+}
+
+MyController.saveBlock = function() {
+  var rootBlock = MyController.getNewOpBlock(BlockFactory.mainWorkspace);
+  if (!rootBlock) {
+    return;
+  }
+  block_name = rootBlock.getFieldValue('NAME');
+  window.alert('the block will be saved as: ' + block_name)
+  if (defined_blocks.includes(block_name)){
+    //Block has the name of a breviously defined block
+    window.alert('The name of the block is a reserved value, please change it.');
+    return;
+  } else {
+    var current_blocks = Object.keys(Blockly.Blocks);
+    var code = languageTA.value; //Works in the JS console
+    if (custom_blocks.includes(block_name)){
+      //window.alert('update block!');
+      Blockly.Blocks[block_name] = {init:Blockly.jsonInitFactory_(JSON.parse(code))};
+    } else {
+      //window.alert('new block!');
+      custom_blocks.push(block_name);
+      Blockly.defineBlocksWithJsonArray([JSON.parse(code)]);
+    }
+  }
+  MyController.updateToolbox();
+};
+
+MyController.updateToolbox = function() {
+  let iterator = 0;
+  let custom_b_toolbox = '<category name="Custom Operations">';
+  while(iterator<custom_blocks.length){
+    custom_b_toolbox = custom_b_toolbox +  '<block type="'+custom_blocks[iterator]+'">' + '</block>' ;
+    iterator = iterator + 1;
+  }
+  custom_b_toolbox = custom_b_toolbox+'</category>'
+  var bioblockstoolbox = bioblocks_starting_toolbox + custom_b_toolbox;
+  var bboptions = { 
+    toolbox : bioblockstoolbox + '</xml>', 
+    collapse : true, 
+    comments : true, 
+    disable : true, 
+    maxBlocks : Infinity, 
+    trashcan : true, 
+    horizontalLayout : false, 
+    toolboxPosition : 'start',
+    css : true, 
+    media : 'https://blockly-demo.appspot.com/static/media/', 
+    rtl : false, 
+    scrollbars : true, 
+    sounds : true, 
+    oneBasedIndex : true
+  };
+  BlockFactory.otherWorkspace.dispose();
+  BlockFactory.otherWorkspace = Blockly.inject('bioblocksDiv',bboptions);
+  MyController.updateToolbox();
 };
 
 MyController.injectCode = function(code, id) {
@@ -332,59 +402,58 @@ MyController.formatJson_ = function(blockType, rootBlock) {
           window.alert("There has been an error parsing a block: Block not defined!")
           break;
       } //Cierre de Switch
-    } //Cierre de IF
-    // Comprobaciones según el tipo de bloque de lo que haya que insertar en el cuerpo del bloque:
-
+    // - Comprobaciones según el tipo de bloque de lo que haya que insertar en el cuerpo del bloque:
     //New Operation special text
-    if (block.type == "new_op"){ 
-      message.push(block.getFieldValue() + ' ' + block.getFieldValue('NAME') + ' %' + message_i);
-      message_i = message_i+1;
-      args.push({
-      "type": "input_dummy",
-      "align": "CENTRE"
-      });
-      block_name = block.getFieldValue('NAME');
-    } //Blocks that have a "null" value on it's body
-    else if (block.type == "check_var"|| block.type == "string_var" || block.type == "numbers_var" || block.type == "field_dropdown" || block.type == "drop_action" ){
-      message.push((block.getFieldValue('NAME')||block.getFieldValue('FIELDNAME')) + ' %' + message_i);
-      message_i = message_i+1;
-      args.push(fields[0]);
-      args.push({
-      "type": "input_dummy"
-      });
-      message.push('%' + message_i);
-      message_i = message_i+1;
-    } //Blocks that have to go to the right and have a notch
-    else if (block.type == "source" || block.type == "destination"){
-      message.push(block.getFieldValue() + ' %' + message_i);
-      message_i = message_i+1;
-      args.push({
-      "type": "input_value",
-      "name": "NAME",
-      "align": "RIGHT"
-      });
-    } //Blocks that have 2 fields to be pushed
-    else if (block.type == "drop_temp" ||  block.type == "drop_duration" ){
-      message.push((block.getFieldValue()||"") + ' %' + message_i + ' %' + (message_i+1));
-      message_i = message_i+2;
-      args.push(fields[0]);
-      args.push(fields[1]);
-      args.push({
-      "type": "input_dummy"
-      });
-      message.push('%' + message_i);
-      message_i = message_i+1;
-    } //Normal Blocks
-    else { 
-      message.push(block.getFieldValue() + ' %' + message_i);
-      message_i = message_i+1;
-      args.push(fields[0]);
-      args.push({
-      "type": "input_dummy"
-      });
-      message.push('%' + message_i);
-      message_i = message_i+1;
-    }
+      if (block.type == "new_op"){ 
+        message.push(block.getFieldValue() + ' ' + block.getFieldValue('NAME') + ' %' + message_i);
+        message_i = message_i+1;
+        args.push({
+        "type": "input_dummy",
+        "align": "CENTRE"
+        });
+        block_name = block.getFieldValue('NAME');
+      } //Blocks that have a "null" value on it's body
+      else if (block.type == "check_var"|| block.type == "string_var" || block.type == "numbers_var" || block.type == "field_dropdown" || block.type == "drop_action" ){
+        message.push((block.getFieldValue('NAME')||block.getFieldValue('FIELDNAME')) + ' %' + message_i);
+        message_i = message_i+1;
+        args.push(fields[0]);
+        args.push({
+        "type": "input_dummy"
+        });
+        message.push('%' + message_i);
+        message_i = message_i+1;
+      } //Blocks that have to go to the right and have a notch
+      else if (block.type == "source" || block.type == "destination"){
+        message.push(block.getFieldValue() + ' %' + message_i);
+        message_i = message_i+1;
+        args.push({
+        "type": "input_value",
+        "name": "NAME",
+        "align": "RIGHT"
+        });
+      } //Blocks that have 2 fields to be pushed
+      else if (block.type == "drop_temp" ||  block.type == "drop_duration" ){
+        message.push((block.getFieldValue()||"") + ' %' + message_i + ' %' + (message_i+1));
+        message_i = message_i+2;
+        args.push(fields[0]);
+        args.push(fields[1]);
+        args.push({
+        "type": "input_dummy"
+        });
+        message.push('%' + message_i);
+        message_i = message_i+1;
+      } //Normal Blocks
+      else { 
+        message.push(block.getFieldValue() + ' %' + message_i);
+        message_i = message_i+1;
+        args.push(fields[0]);
+        args.push({
+        "type": "input_dummy"
+        });
+        message.push('%' + message_i);
+        message_i = message_i+1;
+      }//Cierre de IF-ELSE
+    }//Cierre de IF
     block = block.getChildren()[0]; //gets the first child (and only) the block has
   }//Cierre del while
   
@@ -699,14 +768,6 @@ MyController.updateGenerator = function(block) {
   MyController.injectCode(generatorStub, 'generatorPre');
 };
 
-MyController.addToBlockly = function(block, code) {
-  Blockly.Blocks[block] = code;
-};
-
-MyController.addToBlockly = function(block, code) {
-  Blockly.Blocks[block] = code;
-};
-
 var code_init = {
   "type": "block_type",
   "message0": "Operación: Thermocycling %1 Container Input %2 Variable: velocidad %3 %4 Variable: tiempo %5 %6 Variable: RPM %7",
@@ -749,4 +810,240 @@ var code_init = {
   "tooltip": "hELLO",
   "helpUrl": ""
 };
+
+var bioblocks_starting_toolbox = '<xml id="toolbox" style="display: none">   ' +
+    '<category name="Organization">' +
+      '<block type="experiment"></block>' +
+      '<block type="step"></block>' +
+    '</category>' +
+    '<category name="Containers">' +
+      '<block type="container"></block>' +
+      '<block type="containerList"></block>' +
+    '</category>' +
+    '<category name="Operations">' +
+      '<!--<block type="turbidostat"></block>-->' +
+        '<block type="pipette"></block>' +
+      '<block type="electrophoresis"></block>' +
+      '<block type="incubate"></block>' +
+      '<block type="centrifugation"></block>' +
+      '<block type="thermocycling"></block>' +
+      '<block type="measurement"></block>' +
+      '<block type="sangerSequencing"></block>' +
+      '<block type="oligosynthesize"></block>' +
+      '<block type="colonyPicking"></block>' +
+      '<block type="cellSpreading"></block>' +
+      '<block type="flashFreeze"></block>' +
+      '<block type="mix"></block>' +
+      '<block type="flowCitometry"></block>' +
+    '</category>' +
+      '<category name="Logic">' +
+      '<block type="controls_if"></block>' +
+      '<block type="logic_compare"></block>' +
+      '<block type="logic_operation"></block>' +
+      '<block type="logic_negate"></block>' +
+      '<block type="logic_boolean"></block>' +
+      '<block type="logic_null"></block>' +
+      '<block type="logic_ternary"></block>' +
+    '</category>' +
+    '<category name="Loops">' +
+      '<block type="controls_repeat_ext">' +
+        '<value name="TIMES">' +
+          '<block type="math_number">' +
+            '<field name="NUM">10</field>' +
+          '</block>' +
+        '</value>' +
+      '</block>' +
+      '<block type="controls_whileUntil"></block>' +
+      '<block type="controls_for">' +
+        '<value name="FROM">' +
+          '<block type="math_number">' +
+            '<field name="NUM">1</field>' +
+          '</block>' +
+        '</value>' +
+        '<value name="TO">' +
+          '<block type="math_number">' +
+            '<field name="NUM">10</field>' +
+          '</block>' +
+        '</value>' +
+        '<value name="BY">' +
+          '<block type="math_number">' +
+            '<field name="NUM">1</field>' +
+          '</block>' +
+        '</value>' +
+      '</block>' +
+      '<block type="controls_forEach"></block>' +
+      '<block type="controls_flow_statements"></block>' +
+    '</category>' +
+    '<category name="Math">' +
+      '<block type="math_number"></block>' +
+      '<block type="math_arithmetic"></block>' +
+      '<block type="math_single"></block>' +
+      '<block type="math_trig"></block>' +
+      '<block type="math_constant"></block>' +
+      '<block type="math_number_property"></block>' +
+      '<block type="math_change">' +
+        '<value name="DELTA">' +
+          '<block type="math_number">' +
+            '<field name="NUM">1</field>' +
+          '</block>' +
+        '</value>' +
+      '</block>' +
+      '<block type="math_round"></block>' +
+      '<block type="math_on_list"></block>' +
+      '<block type="math_modulo"></block>' +
+      '<block type="math_constrain">' +
+        '<value name="LOW">' +
+          '<block type="math_number">' +
+            '<field name="NUM">1</field>' +
+          '</block>' +
+        '</value>' +
+        '<value name="HIGH">' +
+          '<block type="math_number">' +
+            '<field name="NUM">100</field>' +
+          '</block>' +
+        '</value>' +
+      '</block>' +
+      '<block type="math_random_int">' +
+        '<value name="FROM">' +
+          '<block type="math_number">' +
+            '<field name="NUM">1</field>' +
+          '</block>' +
+        '</value>' +
+        '<value name="TO">' +
+          '<block type="math_number">' +
+            '<field name="NUM">100</field>' +
+          '</block>' +
+        '</value>' +
+      '</block>' +
+      '<block type="math_random_float"></block>' +
+    '</category>' +
+    '<category name="Variables" custom="VARIABLE"></category>' +
+    '<category name="Functions" custom="PROCEDURE"></category>' /*+
+  '</xml>' // REMOVED SO WE CAN APPEND ON IT THE NEW CATEGORIES*/;
+
+var starting_toolbox = '<xml xmlns="http://www.w3.org/1999/xhtml" id="toolbox" style="display: none;">' +
+  '<category name="Input / Output">' +
+    '<block type="source"></block>' +
+    '<block type="destination"></block>' +
+  '</category>' +
+  '<category name="Number Inputs">' +
+    '<block type="numbers_var">' +
+      '<field name="NAME">Variable</field>' +
+      '<field name="VALUE">0</field>' +
+    '</block>' +
+    '<block type="numbers_time_of_op">' +
+      '<field name="VALUE">0</field>' +
+    '</block>' +
+    '<block type="numbers_speed">' +
+      '<field name="VALUE">0</field>' +
+    '</block>' +
+    '<block type="numbers_cycles">' +
+      '<field name="VALUE">0</field>' +
+    '</block>' +
+    '<block type="numbers_wavelength">' +
+      '<field name="VALUE">0</field>' +
+    '</block>' +
+    '<block type="numbers_sequence">' +
+      '<field name="VALUE">0</field>' +
+    '</block>' +
+    '<block type="numbers_co2">' +
+      '<field name="VALUE">0</field>' +
+    '</block>' +
+  '</category>' +
+  '<category name="String Inputs">' +
+    '<block type="string_var">' +
+      '<field name="NAME">Variable</field>' +
+      '<field name="TEXT"> --- </field>' +
+    '</block>' +
+    '<block type="strings_ladder">' +
+      '<field name="TEXT"> --- </field>' +
+    '</block>' +
+    '<block type="strings_dest">' +
+      '<field name="TEXT"> --- </field>' +
+    '</block>' +
+    '<block type="strings_scale">' +
+      '<field name="TEXT"> --- </field>' +
+    '</block>' +
+    '<block type="strings_purification">' +
+      '<field name="TEXT"> --- </field>' +
+    '</block>' +
+    '<block type="strings_mcc">' +
+      '<field name="TEXT"> --- </field>' +
+    '</block>' +
+  '</category>' +
+  '<category name="Dropdown Menus">' +
+    '<block type="field_dropdown">' +
+      '<field name="NAME">OPTIONNAME</field>' +
+    '</block>' +
+    '<block type="drop_action">' +
+      '<field name="NAME">OPTIONNAME</field>' +
+    '</block>' +
+    '<block type="drop_measure">' +
+      '<field name="NAME">OPTIONNAME</field>' +
+    '</block>' +
+    '<block type="drop_type">' +
+      '<field name="NAME">OPTIONNAME</field>' +
+    '</block>' +
+    '<block type="drop_temp">' +
+      '<field name="NAME">OPTIONNAME</field>' +
+      '<field name="NUMBER">0</field>' +
+    '</block>' +
+    '<block type="drop_duration">' +
+      '<field name="NUMBER">0</field>' +
+      '<field name="NAME">OPTIONNAME</field>' +
+    '</block>' +
+  '</category>' +
+  '<category name="Extra">' +
+    '<block type="check_var">' +
+      '<field name="NAME">Variable</field>' +
+    '</block>' +
+    '<block type="extra_mix_check">' +
+      '<field name="NAME">TRUE</field>' +
+    '</block>' +
+  '</category>' /*+
+  '</xml>' // REMOVED SO WE CAN APPEND ON IT THE NEW CATEGORIES*/;
+
+var myowntoolbox = starting_toolbox;
+
+var bioblockstoolbox = bioblocks_starting_toolbox;
+
+var options = { 
+  toolbox : myowntoolbox + '</xml>', 
+  collapse : true, 
+  comments : true, 
+  disable : true, 
+  maxBlocks : Infinity, 
+  trashcan : true, 
+  horizontalLayout : false, 
+  toolboxPosition : 'start',
+  css : true, 
+  media : 'https://blockly-demo.appspot.com/static/media/', 
+  rtl : false, 
+  scrollbars : true, 
+  sounds : true, 
+  oneBasedIndex : true
+};
+
+var bboptions = { 
+  toolbox : bioblockstoolbox+'</xml>', 
+  collapse : true, 
+  comments : true, 
+  disable : true, 
+  maxBlocks : Infinity, 
+  trashcan : true, 
+  horizontalLayout : false, 
+  toolboxPosition : 'start',
+  css : true, 
+  media : 'https://blockly-demo.appspot.com/static/media/', 
+  rtl : false, 
+  scrollbars : true, 
+  sounds : true, 
+  oneBasedIndex : true
+};
+
+var block_name = 'block_type';
+
+var custom_blocks = Object.keys([]); //It will be the custom block that the logged user has created (Will have to be retrieved by a GET call to MongoDB)
+
+var defined_blocks = Object.keys(Blockly.Blocks); // Blocks that are loaded at the beggining, before any new custom block loads
 
