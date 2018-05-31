@@ -1,0 +1,18 @@
+{
+  "name": "bioblocks-editor",
+  "homepage": "https://github.com/liaupm/bioblocks-editor",
+  "authors": [
+    "Guillermo A. <rigui@hotmail.es>"
+  ],
+  "description": "A blockly-based editor to edit and create BioBlocks",
+  "main": "editor.js",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
