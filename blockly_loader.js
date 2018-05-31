@@ -59,6 +59,7 @@ MyController.deleteBlock = function() {
     window.alert(to_be_deleted + ' is not the name of a custom block, please check it and try again.');
     return; }
   }
+  MyController.updateToolbox();
   return;
 }
 
@@ -115,7 +116,6 @@ MyController.updateToolbox = function() {
   };
   BlockFactory.otherWorkspace.dispose();
   BlockFactory.otherWorkspace = Blockly.inject('bioblocksDiv',bboptions);
-  MyController.updateToolbox();
 };
 
 MyController.injectCode = function(code, id) {
