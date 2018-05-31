@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+  <!----------------- HEAD ------------------>
+  <head>
+    <meta charset="utf-8">
+    <title>Blockly Demo: Toolbox</title>
+    <script src="../blockly-buhorl/blockly_compressed.js"></script>
+    <script src="../blockly-buhorl/blocks_compressed.js"></script>
+    <script src="../blockly-buhorl//msg/js/en.js"></script>
+    <script src="../blockly-buhorl/demos/blockfactory/blocks.js"></script>
+    <script src="../blockly-buhorl/demos/blockfactory/factory_utils.js"></script>
+    <script src="../blockly-buhorl/demos/blockfactory/factory.js"></script>
+    <script src="plugins/require.js"></script>
+    <script src="plugins/jquery-3.3.1.js"></script>
+    <script src="components/editor.js"></script>
+    <script src="blockly_loader.js"></script>
+    <!-- We need to include the BioBlocks -->
+    <style>
+      body {
+        background-color: #f0f0f0;
+        font-family: Verdana, Geneva, sans-serif;
+        color: #3F3F3F
+      }
+      h1 {
+        font-weight: bold;
+        font-size: 145%;
+      }
+    </style>
+  </head>
+  <!----------------- BODY ------------------>
+  <body onload="init();">
+    <!------- CONTENTS -------->
+    <h1>Blockly / Bioblocks implementation</h1>
+    <p>This is my demo for a custom toolbox that loads some blocks</p>
+  <table>
+    <tr><td width=100>
+    <h4>Preview:
+      <select id="direction">
+        <option value="ltr">LTR</option>
+        <option value="rtl">RTL</option>
+      </select>
+    </h4>
+    </td>
+    <td width=200>
+    <h4>Block Definition:
+      <select id="format">
+        <option value="JSON">JSON</option>
+        <option value="JavaScript">JavaScript</option>
+        <option value="Manual-JSON">Manual JSON&hellip;</option>
+        <script>
+          if (document.location.href.indexOf('file://') == 0) {
+            document.write(
+                '<option value="Manual-JS">Manual JavaScript&hellip;</option>');
+          }
+        </script>
+      </select>
+    </h4>
+    <td width=200>
+      <h4>Generator stub:
+        <select id="language">
+          <option value="JavaScript">JavaScript</option>
+          <option value="Python">Python</option>
+          <option value="PHP">PHP</option>
+          <option value="Lua">Lua</option>
+          <option value="Dart">Dart</option>
+        </select>
+      </h4>
+    </td><td width=310>   
+      <BUTTON style="width:300px" id="custom_button_load">Load code from the workspace to the code-box</BUTTON>
+      <br>
+      <BUTTON style="width:300px" id="custom_button_view">Load code from the code-box to the mirror</BUTTON>
+      </td>
+      <td>
+      <BUTTON style="width:100px" id="custom_saveblock">Save Block</BUTTON>
+      <br>
+      <BUTTON style="width:100px" id="custom_deleteblock">Delete Block</BUTTON>
+      </td></tr>
+  </table>
+  <table>
+    <tr style="vertical-align:text-top">
+      <td>
+        <h3>BioBlock Editor</h3>
+        <div id="blocklyDiv" style="height: 510px; width: 500px;"></div>
+      </td>
+      <td>
+        <h3>Block Preview & Code</h3>
+        <div id="preview" style="height: 250px; width: 334px;"></div><br>
+        <textarea id="languageTA" style="border:solid 1px lightgrey; color: #3F3F3F; height: 236px; width: 329px;resize:none">Initial empty space: waiting for some code</textarea>
+      </td>
+      <td>
+        <h3>BioBlock View</h3>
+        <div id="bioblocksDiv" style="height: 510px; width: 500px;"></div>  
+      </td>
+    </tr>
+  </table>
+  
+    <!------- TOOLBOXES -------->
+  <xml id="toolbox_1" style="display: none">This toolbox gets automatically loaded, deprecated</xml>   
+    <!------- SCRIPTS -------->
+  <script>
+    var blocklyFactory;
+    var init = function() {
+      //blocklyFactory = new MyController();
+      MyController.js_init();
+    };
+    window.alert("Welcome to the custom editor")
+  </script>
+  </body>
+</html>
