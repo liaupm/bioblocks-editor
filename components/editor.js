@@ -492,7 +492,7 @@ Blockly.Blocks['field_dropdown'] = {
   // Dropdown menu. EDITED FOR THE EDITOR
   init: function() {
     this.appendDummyInput()
-        .appendField('dropdown')
+        .appendField('Name:')
         .appendField(new Blockly.FieldTextInput('NAME'), 'FIELDNAME');
     this.optionList_ = ['text', 'text', 'text'];
     this.updateShape_();

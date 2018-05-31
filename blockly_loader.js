@@ -52,15 +52,14 @@ MyController.deleteBlock = function() {
     return;
   } else {
     if (custom_blocks.includes(to_be_deleted)){
-      window.alert(to_be_deleted + 'will be deleted.');
+      window.alert(to_be_deleted + ' will be deleted.');
       custom_blocks.remove_by_v(to_be_deleted);
+      MyController.updateToolbox();
       return;
     } else {
     window.alert(to_be_deleted + ' is not the name of a custom block, please check it and try again.');
     return; }
   }
-  MyController.updateToolbox();
-  return;
 }
 
 MyController.saveBlock = function() {
@@ -83,7 +82,7 @@ MyController.saveBlock = function() {
     } else {
       //window.alert('new block!');
       custom_blocks.push(block_name);
-      Blockly.defineBlocksWithJsonArray([JSON.parse(code)]);
+      Blockly.Blocks[block_name] = {init:Blockly.jsonInitFactory_(JSON.parse(code))};
     }
   }
   MyController.updateToolbox();
@@ -91,13 +90,14 @@ MyController.saveBlock = function() {
 
 MyController.updateToolbox = function() {
   let iterator = 0;
-  let custom_b_toolbox = '<category name="Custom Operations">';
+  let custom_b_toolbox = '<sep></sep>' + '<category name="Custom Operations">';
   while(iterator<custom_blocks.length){
     custom_b_toolbox = custom_b_toolbox +  '<block type="'+custom_blocks[iterator]+'">' + '</block>' ;
     iterator = iterator + 1;
   }
   custom_b_toolbox = custom_b_toolbox+'</category>'
   var bioblockstoolbox = bioblocks_starting_toolbox + custom_b_toolbox;
+  BlockFactory.otherWorkspace.updateToolbox(bioblockstoolbox);/*
   var bboptions = { 
     toolbox : bioblockstoolbox + '</xml>', 
     collapse : true, 
@@ -115,7 +115,7 @@ MyController.updateToolbox = function() {
     oneBasedIndex : true
   };
   BlockFactory.otherWorkspace.dispose();
-  BlockFactory.otherWorkspace = Blockly.inject('bioblocksDiv',bboptions);
+  BlockFactory.otherWorkspace = Blockly.inject('bioblocksDiv',bboptions);*/
 };
 
 MyController.injectCode = function(code, id) {
@@ -675,7 +675,7 @@ MyController.updatePreview = function() {
     BlockFactory.previewWorkspace = Blockly.inject('preview',
         {rtl: rtl,
          media : 'https://blockly-demo.appspot.com/static/media/', 
-         scrollbars: true});
+         scrollbars: false});
     BlockFactory.oldDir = newDir;
   }
   BlockFactory.previewWorkspace.clear();

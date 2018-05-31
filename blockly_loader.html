@@ -14,14 +14,16 @@
     <script src="plugins/jquery-3.3.1.js"></script>
     <script src="components/editor.js"></script>
     <script src="blockly_loader.js"></script>
+    <!-- We need to include the BioBlocks -->
     <style>
       body {
-        background-color: #fff;
-        font-family: sans-serif;
+        background-color: #f0f0f0;
+        font-family: Verdana, Geneva, sans-serif;
+        color: #3F3F3F
       }
       h1 {
-        font-weight: normal;
-        font-size: 140%;
+        font-weight: bold;
+        font-size: 145%;
       }
     </style>
   </head>
@@ -53,7 +55,7 @@
         </script>
       </select>
     </h4>
-    <td>
+    <td width=200>
       <h4>Generator stub:
         <select id="language">
           <option value="JavaScript">JavaScript</option>
@@ -63,11 +65,7 @@
           <option value="Dart">Dart</option>
         </select>
       </h4>
-    </td></tr>
-  </table>
-  <table>
-    <tr>
-      <td width=310>   
+    </td><td width=310>   
       <BUTTON style="width:300px" id="custom_button_load">Load code from the workspace to the code-box</BUTTON>
       <br>
       <BUTTON style="width:300px" id="custom_button_view">Load code from the code-box to the mirror</BUTTON>
@@ -76,26 +74,26 @@
       <BUTTON style="width:100px" id="custom_saveblock">Save Block</BUTTON>
       <br>
       <BUTTON style="width:100px" id="custom_deleteblock">Delete Block</BUTTON>
-      </td>
-    </tr>
+      </td></tr>
   </table>
-  <br>
   <table>
-    <tr>
+    <tr style="vertical-align:text-top">
       <td>
-        <h3>Workspace</h3>
-        <div id="blocklyDiv" style="height: 570px; width: 500px;"></div>
+        <h3>BioBlock Editor</h3>
+        <div id="blocklyDiv" style="height: 510px; width: 500px;"></div>
       </td>
-      <td style="vertical-align:text-top">
-        <h3>Mirror</h3>
-        <div id="preview" style="height: 300px; width: 430px;"></div>
-        <h3>Code-box</h3>
-        <textarea id="languageTA" style="height: 200px; width: 430px;resize:none">Initial empty space: waiting for some code</textarea>
+      <td>
+        <h3>Block Preview & Code</h3>
+        <div id="preview" style="height: 250px; width: 334px;"></div><br>
+        <textarea id="languageTA" style="border:solid 1px lightgrey; color: #3F3F3F; height: 236px; width: 329px;resize:none">Initial empty space: waiting for some code</textarea>
+      </td>
+      <td>
+        <h3>BioBlock View</h3>
+        <div id="bioblocksDiv" style="height: 510px; width: 500px;"></div>  
       </td>
     </tr>
   </table>
-  <h3>BioBlocks</h3>
-  <div id="bioblocksDiv" style="height: 570px; width: 935px;"></div>
+  
     <!------- TOOLBOXES -------->
   <xml id="toolbox_1" style="display: none">This toolbox gets automatically loaded, deprecated</xml>   
     <!------- SCRIPTS -------->
