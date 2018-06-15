@@ -1,14 +1,3 @@
-goog.provide('MyController');
-
-goog.require('BlockFactory');
-goog.require('BlocklyDevTools.Analytics');
-goog.require('FactoryUtils');
-goog.require('BlockLibraryController');
-goog.require('BlockExporterController');
-goog.require('goog.dom.classlist');
-goog.require('goog.ui.PopupColorPicker');
-goog.require('goog.ui.ColorPicker');
-
 //To remove elements by value, not position
 Array.prototype.remove_by_v = function() {
     var what, a = arguments, L = a.length, ax;
@@ -21,15 +10,22 @@ Array.prototype.remove_by_v = function() {
     return this;
 };
 
-MyController.STARTER_BLOCK_XML_TEXT = '<xml><block type="new_op" ' +
+var STARTER_BLOCK_XML_TEXT = '<xml><block type="new_op" ' +
     'deletable="false" movable="false"></block></xml>';
 
+var MyController = {
+};
+
+var defined_blocks; // = Object.keys(Blockly.Blocks); // Blocks that are loaded at the beggining, before any new custom block loads
+
 MyController.js_init = function() {
+  window.alert('Init started')
+  defined_blocks = Object.keys(Blockly.Blocks); // Blocks that are loaded at the beggining, before any new custom block loads
   document.getElementById('custom_button_load').onclick = MyController.translate;  
   document.getElementById('custom_button_view').onclick = MyController.updatePreview; 
   document.getElementById('custom_saveblock').onclick = MyController.saveBlock;  
   document.getElementById('custom_deleteblock').onclick = MyController.deleteBlock;  
-  BlockFactory.mainWorkspace = Blockly.inject('blocklyDiv',options);
+  BlockFactory.mainWorkspace = Blockly.inject('editblockDiv',options);
   BlockFactory.otherWorkspace = Blockly.inject('bioblocksDiv',bboptions);
   BlockFactory.mainWorkspace.addChangeListener(MyController.translate);
   MyController.injectCode(JSON.stringify(code_init,null, 2), 'languageTA'); //"premade" code to be displayed
@@ -38,9 +34,14 @@ MyController.js_init = function() {
   window.alert("My JS loaded!");
 };
 
+function js_init2(){
+  this.js_init();
+  //window.alert("My JS loaded!");
+};
+
 MyController.showStarterBlock = function() {
   BlockFactory.mainWorkspace.clear();
-  var xml = Blockly.Xml.textToDom(MyController.STARTER_BLOCK_XML_TEXT);
+  var xml = Blockly.Xml.textToDom(STARTER_BLOCK_XML_TEXT);
   Blockly.Xml.domToWorkspace(xml, BlockFactory.mainWorkspace);
 };
 
@@ -680,7 +681,7 @@ MyController.updatePreview = function() {
   }
   BlockFactory.previewWorkspace.clear();
 
-  var format = BlockFactory.getBlockDefinitionFormat();
+  var format = 'JSON';//BlockFactory.getBlockDefinitionFormat();
   var code = document.getElementById('languageTA').value;
   if (!code.trim()) {
     // Nothing to render.  Happens while cloud storage is loading.
@@ -1003,12 +1004,12 @@ var starting_toolbox = '<xml xmlns="http://www.w3.org/1999/xhtml" id="toolbox" s
   '</category>' /*+
   '</xml>' // REMOVED SO WE CAN APPEND ON IT THE NEW CATEGORIES*/;
 
-var myowntoolbox = starting_toolbox;
+var editortoolbox = starting_toolbox;
 
 var bioblockstoolbox = bioblocks_starting_toolbox;
 
 var options = { 
-  toolbox : myowntoolbox + '</xml>', 
+  toolbox : editortoolbox + '</xml>', 
   collapse : true, 
   comments : true, 
   disable : true, 
@@ -1045,5 +1046,5 @@ var block_name = 'block_type';
 
 var custom_blocks = Object.keys([]); //It will be the custom block that the logged user has created (Will have to be retrieved by a GET call to MongoDB)
 
-var defined_blocks = Object.keys(Blockly.Blocks); // Blocks that are loaded at the beggining, before any new custom block loads
+//var defined_blocks = Object.keys(Blockly.Blocks); // Blocks that are loaded at the beggining, before any new custom block loads
 
