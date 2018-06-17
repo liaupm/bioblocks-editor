@@ -1,4 +1,16 @@
-//To remove elements by value, not position
+/*
+For the correct functionallity of this code you need: 
+ - The Blockly main files (blockly_compressed.js, blocks_compressed.js, msg/js/en.js)
+ - Some files from the 'blockfactory' demo (blocks.js, factory.js & factory_utils.js)
+ - The Bioblock's blocks files (this is for having them show up in the toolbox)
+*/
+/* --------------------------------------------------------- External Code ------------------------------------------------------ */
+
+
+/*
+To remove elements by value, not position. Source:
+https://stackoverflow.com/questions/3954438/how-to-remove-item-from-array-by-value 
+*/
 Array.prototype.remove_by_v = function() {
     var what, a = arguments, L = a.length, ax;
     while (L && this.length) {
@@ -10,41 +22,109 @@ Array.prototype.remove_by_v = function() {
     return this;
 };
 
-var STARTER_BLOCK_XML_TEXT = '<xml><block type="new_op" ' +
-    'deletable="false" movable="false"></block></xml>';
+/* 
+To handle file download. Source: 
+https://ourcodeworld.com/articles/read/189/how-to-create-a-file-and-generate-a-download-with-javascript-in-the-browser-without-a-server
+*/
+function download(filename, text) {
+    var element = document.createElement('a');
+    element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+    element.setAttribute('download', filename);
 
+    element.style.display = 'none';
+    document.body.appendChild(element);
+
+    element.click();
+
+    document.body.removeChild(element);
+}
+
+
+/* ---------------------------------------------------------- Main Code ------------------------------------------------------- */
+
+
+// Namespace of the editor. All of the functions created by @Buhorl are declared inside
 var MyController = {
 };
 
-var defined_blocks; // = Object.keys(Blockly.Blocks); // Blocks that are loaded at the beggining, before any new custom block loads
-
+// Initial function. Used to load the editor to make it usable
 MyController.js_init = function() {
-  window.alert('Init started')
-  defined_blocks = Object.keys(Blockly.Blocks); // Blocks that are loaded at the beggining, before any new custom block loads
+  console.log('Init started...') //This a
+  //Blocks that are loaded at the beggining, before any new custom block loads
+  defined_blocks = Object.keys(Blockly.Blocks); 
+  //Button declarations
   document.getElementById('custom_button_load').onclick = MyController.translate;  
   document.getElementById('custom_button_view').onclick = MyController.updatePreview; 
   document.getElementById('custom_saveblock').onclick = MyController.saveBlock;  
-  document.getElementById('custom_deleteblock').onclick = MyController.deleteBlock;  
+  document.getElementById('custom_deleteblock').onclick = MyController.deleteBlock;
+  document.getElementById('custom_downloadblock').onclick = MyController.downloadblock;  
+  document.getElementById('custom_downloadblocks').onclick = MyController.downloadblocks;  
+  //Injections of the 3 workspaces: editor, preview of the block and bioblock preview
   BlockFactory.mainWorkspace = Blockly.inject('editblockDiv',options);
   BlockFactory.otherWorkspace = Blockly.inject('bioblocksDiv',bboptions);
-  BlockFactory.mainWorkspace.addChangeListener(MyController.translate);
-  MyController.injectCode(JSON.stringify(code_init,null, 2), 'languageTA'); //"premade" code to be displayed
-  MyController.updatePreview();
+  BlockFactory.mainWorkspace.addChangeListener(MyController.translate); //this is for the automatic changes in the preview
+  MyController.injectCode(JSON.stringify(code_init,null, 2), 'languageTA'); //"premade" code to be displayed. Gets overwritten if loads correctly
+  MyController.updatePreview(); 
   MyController.showStarterBlock();
-  window.alert("My JS loaded!");
+  console.log('Init has finished');
 };
 
-function js_init2(){
-  this.js_init();
-  //window.alert("My JS loaded!");
-};
-
+//Function used to load the "new_op" block
 MyController.showStarterBlock = function() {
   BlockFactory.mainWorkspace.clear();
   var xml = Blockly.Xml.textToDom(STARTER_BLOCK_XML_TEXT);
   Blockly.Xml.domToWorkspace(xml, BlockFactory.mainWorkspace);
 };
 
+//Wonky way to call the function to download only one block
+MyController.downloadblock = function(){
+  MyController.download('block');  
+}
+
+//Same but for all the defined blocks
+MyController.downloadblocks = function(){
+  MyController.download('all');
+}
+
+//This function is used to prepare the text to download. Uses a function i found on the internet to handle the file download
+MyController.download = function(name){
+    // Generate download with the XML to load the toolbox
+    let comment;
+    comment = '<!--This file is the XML used to define toolbox for the custom block(s)-->\n\n';
+    var rootBlock = MyController.getNewOpBlock(BlockFactory.mainWorkspace);
+    var text = '<block type="'+ rootBlock.getFieldValue('NAME') +'">' + '</block>';
+    var filename = "block_toolbox.xml";
+    if (name=='all'){
+      let iterator = 0;
+      let custom_b_toolbox = '<sep></sep>\n' + '<category name="Custom Operations">\n';
+      while(iterator<custom_blocks.length){
+        custom_b_toolbox = custom_b_toolbox +  '<block type="'+custom_blocks[iterator]+'">' + '</block>\n' ;
+        iterator = iterator + 1;
+      }
+      custom_b_toolbox = custom_b_toolbox+'</category>'
+      text = custom_b_toolbox;
+      filename = "all_blocks_toolbox.xml"
+    } 
+    download(filename, comment + text);
+    // Generate download with the JSON code of the blocks
+    comment = '//This file contains the JSON that defines this block. You have to add it to Blockly/BioBlock manually. \n';
+    text = document.getElementById('languageTA').value;
+    filename = "block.json";
+    if (name=='all'){
+      iterator = 0;
+      text = "Blockly.defineBlocksWithJsonArray([\n"
+      while(iterator<custom_blocks.length-1){
+        comment = '//This file contains the function to declare all the BioBlocks\n\n';
+        text = text + custom_blocks_code[custom_blocks[iterator]] + ',\n';
+        iterator = iterator + 1;
+      }
+      text = text + custom_blocks_code[custom_blocks[iterator]] + '\n]);';
+      filename = "all_blocks.js"
+    }
+    download(filename, comment + text);
+}
+
+//Function to delete the block from the BioBlock workspace
 MyController.deleteBlock = function() {
   let to_be_deleted = prompt("What block that you created do you want to delete?");
   if (defined_blocks.includes(to_be_deleted)){
@@ -55,7 +135,7 @@ MyController.deleteBlock = function() {
     if (custom_blocks.includes(to_be_deleted)){
       window.alert(to_be_deleted + ' will be deleted.');
       custom_blocks.remove_by_v(to_be_deleted);
-      MyController.updateToolbox();
+      MyController.updateToolbox(); //Changes to the bioblock workspace apply here
       return;
     } else {
     window.alert(to_be_deleted + ' is not the name of a custom block, please check it and try again.');
@@ -63,10 +143,11 @@ MyController.deleteBlock = function() {
   }
 }
 
+//Function to save the block to the BioBlock workspace
 MyController.saveBlock = function() {
   var rootBlock = MyController.getNewOpBlock(BlockFactory.mainWorkspace);
   if (!rootBlock) {
-    return;
+    return; //Legacy check. Now we sould always get the correct block unless a problen occurs
   }
   block_name = rootBlock.getFieldValue('NAME');
   window.alert('the block will be saved as: ' + block_name)
@@ -79,18 +160,22 @@ MyController.saveBlock = function() {
     var code = languageTA.value; //Works in the JS console
     if (custom_blocks.includes(block_name)){
       //window.alert('update block!');
+      custom_blocks_code[block_name] = code;
       Blockly.Blocks[block_name] = {init:Blockly.jsonInitFactory_(JSON.parse(code))};
     } else {
       //window.alert('new block!');
+      custom_blocks_code[block_name] = code;
       custom_blocks.push(block_name);
       Blockly.Blocks[block_name] = {init:Blockly.jsonInitFactory_(JSON.parse(code))};
     }
   }
-  MyController.updateToolbox();
+  MyController.updateToolbox(); //Changes to the bioblock workspace apply here
 };
 
+//Apply the changes to the custom bioblocks to the workspace.
 MyController.updateToolbox = function() {
   let iterator = 0;
+  //We create the XML code of all the custom blocks
   let custom_b_toolbox = '<sep></sep>' + '<category name="Custom Operations">';
   while(iterator<custom_blocks.length){
     custom_b_toolbox = custom_b_toolbox +  '<block type="'+custom_blocks[iterator]+'">' + '</block>' ;
@@ -98,34 +183,17 @@ MyController.updateToolbox = function() {
   }
   custom_b_toolbox = custom_b_toolbox+'</category>'
   var bioblockstoolbox = bioblocks_starting_toolbox + custom_b_toolbox;
-  BlockFactory.otherWorkspace.updateToolbox(bioblockstoolbox);/*
-  var bboptions = { 
-    toolbox : bioblockstoolbox + '</xml>', 
-    collapse : true, 
-    comments : true, 
-    disable : true, 
-    maxBlocks : Infinity, 
-    trashcan : true, 
-    horizontalLayout : false, 
-    toolboxPosition : 'start',
-    css : true, 
-    media : 'https://blockly-demo.appspot.com/static/media/', 
-    rtl : false, 
-    scrollbars : true, 
-    sounds : true, 
-    oneBasedIndex : true
-  };
-  BlockFactory.otherWorkspace.dispose();
-  BlockFactory.otherWorkspace = Blockly.inject('bioblocksDiv',bboptions);*/
+  // and we append the new toolbox to the "old" one. 
+  //We use and embed Blockly function. This is because otherwise it would be too complicated
+  BlockFactory.otherWorkspace.updateToolbox(bioblockstoolbox); 
 };
 
 MyController.injectCode = function(code, id) {
   var pre = document.getElementById(id);
   pre.textContent = code;
- // code = pre.textContent;
- // code = PR.prettyPrintOne(code, 'js');
   pre.innerHTML = code;
 };
+
 //Funcion para obtener el bloque de creación de operaciones
 MyController.getNewOpBlock = function(workspace) {
   var blocks = workspace.getTopBlocks(false);
@@ -137,7 +205,10 @@ MyController.getNewOpBlock = function(workspace) {
   return null;
 };
 
-//funcion usada para traducir los bloques del workspace en código
+/*
+Function to translate the editor blocks into code and send it where it belongs.
+If we want to add new blocks to the editor, we have to go to formatJson_ wich is the one that does the real translation 
+*/
 MyController.translate = function() {
   var rootBlock = MyController.getNewOpBlock(BlockFactory.mainWorkspace);
   if (!rootBlock) {
@@ -147,7 +218,6 @@ MyController.translate = function() {
   if (!blockType) {
     blockType = BlockFactory.UNNAMED;
   }
-
   if (!BlockFactory.updateBlocksFlag) {
     var format = document.getElementById('format').value;
     if (format == 'Manual-JSON') {
@@ -155,17 +225,14 @@ MyController.translate = function() {
     } else if (format == 'Manual-JS') {
       format = 'JavaScript';
     }
-
     var code = MyController.getBlockDefinition(blockType, rootBlock, format);
-    //TODO: Esta es la funcioón a cambiar, la generación de código ha de ser custom para mis bloques. WIP: la de arriba
-    //var code = FactoryUtils.getBlockDefinition(blockType, rootBlock, format, BlockFactory.mainWorkspace);
-
     MyController.injectCode(code, 'languageTA');
   }
-  //Automaticamente cambiar la vista del bloque cuando se cargue en el bloque(?)
+  //Automatically changes the view when the block is loaded.
   MyController.updatePreview();
 };
 
+//Gets the format of the code. Right now only JSON is implemented (it's simpler to use, and we only need that one for now) 
 MyController.getBlockDefinition = function(blockType, rootBlock, format) {
   blockType = FactoryUtils.cleanBlockType(blockType);
   switch (format) {
@@ -179,6 +246,11 @@ MyController.getBlockDefinition = function(blockType, rootBlock, format) {
   return code;
 };
 
+/*
+Biggest & most important function in the entire file
+ESP: Si se quiere añadir nuevos bloques al editor, es aquí donde hay que meterlos para que se traten según lo que se quiera que hagan.
+ENG: If we want to add new block to the editor, here is where we have to add them so they do what they should.
+*/
 MyController.formatJson_ = function(blockType, rootBlock) {
   var JS = {};
   // Type is not used by Blockly, but may be used by a loader.
@@ -187,8 +259,8 @@ MyController.formatJson_ = function(blockType, rootBlock) {
   var message = [];
   var args = [];
   var message_i = 1;
-  var block = rootBlock;//.getChildren()[0]; //gets the first child (and only) the block has
-  while (block) { //While not null -> we have a block to work with
+  var block = rootBlock; //we start going through all the blocks, starting by the root (new_op)
+  while (block) { //While not null --> we have a block to work with
     var fields = [];
     if (!block.disabled/* && !block.getInheritedDisabled()*/) {
       switch (block.type) {
@@ -397,7 +469,7 @@ MyController.formatJson_ = function(blockType, rootBlock) {
           });
           break;
         //case 'extra_settings': //Temporally disabled
-        case 'new_op': //It does jack shit
+        case 'new_op': 
           break;
         case 'default':
           window.alert("There has been an error parsing a block: Block not defined!")
@@ -455,24 +527,9 @@ MyController.formatJson_ = function(blockType, rootBlock) {
         message_i = message_i+1;
       }//Cierre de IF-ELSE
     }//Cierre de IF
-    block = block.getChildren()[0]; //gets the first child (and only) the block has
+    block = block.getChildren()[0]; //gets the first child (and only) the block has -> Problem if the editor blocks have >1 child (example: right side notches)
   }//Cierre del while
   
-    //contentsBlock = contentsBlock.nextConnection && contentsBlock.nextConnection.targetBlock();
-  //}
-  // Remove last input if dummy and not empty.
-  /*
-  if (lastInput && lastInput.type == 'input_dummy') {
-    var fields = lastInput.getInputTargetBlock('FIELDS');
-    if (fields && FactoryUtils.getFieldsJson_(fields).join('').trim() != '') {
-      var align = lastInput.getFieldValue('ALIGN');
-      if (align != 'LEFT') {
-        JS.lastDummyAlign0 = align;
-      }
-      args.pop();
-      message.pop();
-    }
-  }*/
   JS.message0 = message.join(' ');
   if (args.length) {
     JS.args0 = args;
@@ -480,14 +537,12 @@ MyController.formatJson_ = function(blockType, rootBlock) {
   // Generate external switch.
   JS.inputsInline = false;
   // Generate output, or next/previous connections. Will always be BOTH:
-  //switch (rootBlock.getFieldValue('CONNECTIONS')) {case 'BOTH':
   JS.previousStatement =
       JSON.parse(
           FactoryUtils.getOptTypesFrom(rootBlock, 'TOPTYPE') || 'null');
   JS.nextStatement =
       JSON.parse(
           FactoryUtils.getOptTypesFrom(rootBlock, 'BOTTOMTYPE') || 'null');
-    //break;}
   // Generate colour.
   /*
   var colourBlock = rootBlock.getInputTargetBlock('COLOUR');
@@ -495,176 +550,15 @@ MyController.formatJson_ = function(blockType, rootBlock) {
     var hue = parseInt(colourBlock.getFieldValue('HUE'), 10);
     JS.colour = hue;
   }*/
-
+  // Generate tooltips/url for the block
   //JS.tooltip = FactoryUtils.getTooltipFromRootBlock_(rootBlock);
   //JS.helpUrl = FactoryUtils.getHelpUrlFromRootBlock_(rootBlock);
-  JS.colour = rootBlock.getHue();
+  JS.colour = rootBlock.getHue(); //The block colour get's inherited from the root block 
 
   return JSON.stringify(JS, null, '  ');
 };
 
-MyController.getFieldsJson_ = function(block) {
-  var fields = [];
-  while (block) {
-    if (!block.disabled && !block.getInheritedDisabled()) {
-      switch (block.type) {
-        // NUMBER BLOCKS
-        case 'numbers_time_of_op':
-        case 'numbers_speed':
-        case 'numbers_cycles':
-        case 'numbers_wavelength':
-        case 'numbers_sequence':
-        case 'numbers_co2':
-        case 'numbers_speed':
-          var obj = {
-            type: block.type,
-            name: block.getFieldValue('FIELDNAME'),
-            value: parseFloat(block.getFieldValue('VALUE'))
-          };
-            obj.min = 0;
-            obj.max = Infinity;
-            obj.precision = 0;
-          fields.push(obj);
-          break;
-        // STRING BLOCKS
-        case 'strings_ladder':
-        case 'strings_dest':
-        case 'strings_scale':
-        case 'strings_purification':
-        case 'strings_mcc':
-          fields.push({
-            type: block.type,
-            name: "NAME",
-            text: block.getFieldValue()
-          });
-          break;
-        // DROPDOWN BLOCKS
-        case 'drop_measure':
-          var options = [
-            [
-              "Abrorbance",
-              "OPTIONNAME"
-            ],
-            [
-              "Fluorescence",
-              "OPTIONNAME"
-            ],
-            [
-              "Luminiscence",
-              "OPTIONNAME"
-            ],
-            [
-              "Volume",
-              "OPTIONNAME"
-            ],
-            [
-              "Temperature",
-              "OPTIONNAME"
-            ]
-          ];
-          fields.push({
-            type: block.type,
-            name: "dropdown",
-            options: options
-          });
-          break;
-        case 'drop_action':
-          var options = [
-            [
-              "Transfer",
-              "OPTIONNAME"
-            ],
-            [
-              "Distribute",
-              "OPTIONNAME"
-            ],
-            [
-              "Consolidate",
-              "OPTIONNAME"
-            ],
-            [
-              "Continuous Transfer",
-              "OPTIONNAME"
-            ]
-          ];
-          fields.push({
-            type: block.type,
-            name: "dropdown",
-            options: options
-          });
-          break;
-        case 'drop_type':
-          var options = [
-            [
-              "Vortex",
-              "OPTIONNAME"
-            ],
-            [
-              "Shake",
-              "OPTIONNAME"
-            ]            
-          ];
-          fields.push({
-            type: block.type,
-            name: "dropdown",
-            options: options
-          });
-          break;
-        case 'drop_temp':
-          var options = [
-          [
-            "Celsius",
-            "OPTIONNAME"
-          ],
-          [
-            "Kelvin",
-            "OPTIONNAME"
-          ]
-          ];
-          fields.push({
-            type: block.type,
-            name: "dropdown",
-            options: options
-          });
-          break;
-        case 'drop_duration':
-          var options = [
-            [
-              "Milliseconds",
-              "OPTIONNAME"
-            ],
-            [
-              "Seconds",
-              "OPTIONNAME"
-            ],
-            [
-              "Minutes",
-              "OPTIONNAME"
-            ],
-            [
-              "Hours",
-              "OPTIONNAME"
-            ]
-          ];
-          fields.push({
-            type: block.type,
-            name: "dropdown",
-            options: options
-          });
-          break;
-        case 'extra_settings':
-        case 'extra_mix_check':
-        case 'default':
-          window.alert("There has been an error parsing a block: Block not defined!")
-          break;
-      }
-    }
-    block = block.nextConnection && block.nextConnection.targetBlock();
-  }
-  return fields;
-};
-
-
+// Reloading the preview workspace 
 MyController.updatePreview = function() {
   // Toggle between LTR/RTL if needed (also used in first display).
   var newDir = document.getElementById('direction').value;
@@ -684,7 +578,7 @@ MyController.updatePreview = function() {
   var format = 'JSON';//BlockFactory.getBlockDefinitionFormat();
   var code = document.getElementById('languageTA').value;
   if (!code.trim()) {
-    // Nothing to render.  Happens while cloud storage is loading.
+    // Nothing to render. Happens while cloud storage is loading.
     return;
   }
 
@@ -731,8 +625,8 @@ MyController.updatePreview = function() {
     // Create the preview block.
     var previewBlock = BlockFactory.previewWorkspace.newBlock(blockType);
     previewBlock.initSvg();
-    previewBlock.render();
-    previewBlock.setMovable(false);
+    previewBlock.render(); // important, so the block svg resizes correctly
+    previewBlock.setMovable(false); 
     previewBlock.setDeletable(false);
     previewBlock.moveBy(15, 10);
     BlockFactory.previewWorkspace.clearUndo();
@@ -769,6 +663,9 @@ MyController.updateGenerator = function(block) {
   MyController.injectCode(generatorStub, 'generatorPre');
 };
 
+      /* ------------ Editor Variables ------------ */
+
+// Example of a block to load at the beggining. It gets replaced fast if the editor loads correctly so it's barely visible
 var code_init = {
   "type": "block_type",
   "message0": "Operación: Thermocycling %1 Container Input %2 Variable: velocidad %3 %4 Variable: tiempo %5 %6 Variable: RPM %7",
@@ -812,6 +709,7 @@ var code_init = {
   "helpUrl": ""
 };
 
+// First toolbox for the BioBlock editor
 var bioblocks_starting_toolbox = '<xml id="toolbox" style="display: none">   ' +
     '<category name="Organization">' +
       '<block type="experiment"></block>' +
@@ -922,6 +820,7 @@ var bioblocks_starting_toolbox = '<xml id="toolbox" style="display: none">   ' +
     '<category name="Functions" custom="PROCEDURE"></category>' /*+
   '</xml>' // REMOVED SO WE CAN APPEND ON IT THE NEW CATEGORIES*/;
 
+// The editor Toolbox. Add/Modify here if you want to change what blocks appear on the editor
 var starting_toolbox = '<xml xmlns="http://www.w3.org/1999/xhtml" id="toolbox" style="display: none;">' +
   '<category name="Input / Output">' +
     '<block type="source"></block>' +
@@ -1008,6 +907,7 @@ var editortoolbox = starting_toolbox;
 
 var bioblockstoolbox = bioblocks_starting_toolbox;
 
+//Options for the editor
 var options = { 
   toolbox : editortoolbox + '</xml>', 
   collapse : true, 
@@ -1025,6 +925,7 @@ var options = {
   oneBasedIndex : true
 };
 
+//Options for the bioblocks workspace
 var bboptions = { 
   toolbox : bioblockstoolbox+'</xml>', 
   collapse : true, 
@@ -1042,9 +943,19 @@ var bboptions = {
   oneBasedIndex : true
 };
 
+// Blocks that are loaded at the beggining, before any new custom block loads
+var defined_blocks; // = Object.keys(Blockly.Blocks); 
+
+// var that contains the "new_op" block that is used in the editor
+var STARTER_BLOCK_XML_TEXT = '<xml><block type="new_op" ' +
+    'deletable="false" movable="false"></block></xml>';
+
+//Initial given na,e of the starter block. Gets changed
 var block_name = 'block_type';
 
 var custom_blocks = Object.keys([]); //It will be the custom block that the logged user has created (Will have to be retrieved by a GET call to MongoDB)
+
+var custom_blocks_code = Object.keys([]); //To store the block's code to be able to later download them
 
 //var defined_blocks = Object.keys(Blockly.Blocks); // Blocks that are loaded at the beggining, before any new custom block loads
 
