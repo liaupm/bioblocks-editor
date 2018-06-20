@@ -875,15 +875,15 @@ var code_init = {
 
 // First toolbox for the BioBlock editor
 var bioblocks_starting_toolbox = '<xml id="toolbox" style="display: none">   ' +
-    '<category name="Organization">' +
+    '<category name="Organization" colour="#222222">' +
       '<block type="experiment"></block>' +
       '<block type="step"></block>' +
     '</category>' +
-    '<category name="Containers">' +
+    '<category name="Containers" colour="#5d79a6">' +
       '<block type="container"></block>' +
       '<block type="containerList"></block>' +
     '</category>' +
-    '<category name="Operations">' +
+    '<category name="Operations" colour="#3AB157">' +
       '<!--<block type="turbidostat"></block>-->' +
         '<block type="pipette"></block>' +
       '<block type="electrophoresis"></block>' +
@@ -899,7 +899,8 @@ var bioblocks_starting_toolbox = '<xml id="toolbox" style="display: none">   ' +
       '<block type="mix"></block>' +
       '<block type="flowCitometry"></block>' +
     '</category>' +
-      '<category name="Logic">' +
+    '<sep></sep>' +
+      '<category name="Logic" colour="#999999">' +
       '<block type="controls_if"></block>' +
       '<block type="logic_compare"></block>' +
       '<block type="logic_operation"></block>' +
@@ -908,7 +909,7 @@ var bioblocks_starting_toolbox = '<xml id="toolbox" style="display: none">   ' +
       '<block type="logic_null"></block>' +
       '<block type="logic_ternary"></block>' +
     '</category>' +
-    '<category name="Loops">' +
+    '<category name="Loops" colour="#999999">' +
       '<block type="controls_repeat_ext">' +
         '<value name="TIMES">' +
           '<block type="math_number">' +
@@ -937,7 +938,7 @@ var bioblocks_starting_toolbox = '<xml id="toolbox" style="display: none">   ' +
       '<block type="controls_forEach"></block>' +
       '<block type="controls_flow_statements"></block>' +
     '</category>' +
-    '<category name="Math">' +
+    '<category name="Math" colour="#999999">' +
       '<block type="math_number"></block>' +
       '<block type="math_arithmetic"></block>' +
       '<block type="math_single"></block>' +
@@ -980,11 +981,11 @@ var bioblocks_starting_toolbox = '<xml id="toolbox" style="display: none">   ' +
       '</block>' +
       '<block type="math_random_float"></block>' +
     '</category>' +
-    '<category name="Variables" custom="VARIABLE"></category>' +
-    '<category name="Functions" custom="PROCEDURE"></category>' /*+
+    '<category name="Variables" custom="VARIABLE" colour="#999999"></category>' +
+    '<category name="Functions" custom="PROCEDURE" colour="#999999"></category>' /*+
   '</xml>' // REMOVED SO WE CAN APPEND ON IT THE NEW CATEGORIES*/
   //Added the BioCoder Blocks
-  + //'<xml xmlns="http://www.w3.org/1999/xhtml" id="toolbox" style="display: none;">' +
+  + '<sep></sep>' + //'<xml xmlns="http://www.w3.org/1999/xhtml" id="toolbox" style="display: none;">' +
 '<category name="Declaration &amp; Mixing" colour="#a55b5b">' +
 '<block type="new_fluid">' +
 '<field name="NAME">Name</field>' +
@@ -1074,11 +1075,11 @@ var bioblocks_starting_toolbox = '<xml id="toolbox" style="display: none">   ' +
 
 // The editor Toolbox. Add/Modify here if you want to change what blocks appear on the editor
 var starting_toolbox = '<xml xmlns="http://www.w3.org/1999/xhtml" id="toolbox" style="display: none;">' +
-  '<category name="Input / Output">' +
+  '<category name="Input / Output" colour="#A29857">' +
     '<block type="source"></block>' +
     '<block type="destination"></block>' +
   '</category>' +
-  '<category name="Number Inputs">' +
+  '<category name="Number Inputs" colour="#A77358">' +
     '<block type="numbers_var">' +
       '<field name="NAME">Variable</field>' +
       '<field name="VALUE">0</field>' +
@@ -1102,7 +1103,7 @@ var starting_toolbox = '<xml xmlns="http://www.w3.org/1999/xhtml" id="toolbox" s
       '<field name="VALUE">0</field>' +
     '</block>' +
   '</category>' +
-  '<category name="String Inputs">' +
+  '<category name="String Inputs" colour="#4CA7A5">' +
     '<block type="string_var">' +
       '<field name="NAME">Variable</field>' +
       '<field name="TEXT"> --- </field>' +
@@ -1123,7 +1124,7 @@ var starting_toolbox = '<xml xmlns="http://www.w3.org/1999/xhtml" id="toolbox" s
       '<field name="TEXT"> --- </field>' +
     '</block>' +
   '</category>' +
-  '<category name="Dropdown Menus">' +
+  '<category name="Dropdown Menus" colour="#6457A6">' +
     '<block type="field_dropdown">' +
       '<field name="NAME">OPTIONNAME</field>' +
     '</block>' +
@@ -1145,7 +1146,7 @@ var starting_toolbox = '<xml xmlns="http://www.w3.org/1999/xhtml" id="toolbox" s
       '<field name="NAME">OPTIONNAME</field>' +
     '</block>' +
   '</category>' +
-  '<category name="Extra">' +
+  '<category name="Extra" colour="#B038A5">' +
     '<block type="check_var">' +
       '<field name="NAME">Variable</field>' +
     '</block>' +
