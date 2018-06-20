@@ -982,7 +982,95 @@ var bioblocks_starting_toolbox = '<xml id="toolbox" style="display: none">   ' +
     '</category>' +
     '<category name="Variables" custom="VARIABLE"></category>' +
     '<category name="Functions" custom="PROCEDURE"></category>' /*+
-  '</xml>' // REMOVED SO WE CAN APPEND ON IT THE NEW CATEGORIES*/;
+  '</xml>' // REMOVED SO WE CAN APPEND ON IT THE NEW CATEGORIES*/
+  //Added the BioCoder Blocks
+  + //'<xml xmlns="http://www.w3.org/1999/xhtml" id="toolbox" style="display: none;">' +
+'<category name="Declaration &amp; Mixing" colour="#a55b5b">' +
+'<block type="new_fluid">' +
+'<field name="NAME">Name</field>' +
+'<field name="NAME">0</field>' +
+'<field name="NAME">Name</field>' +
+'</block>' +
+'<block type="new_solid">' +
+'<field name="NAME">Name</field>' +
+'<field name="NAME">0</field>' +
+'<field name="NAME">0</field>' +
+'</block>' +
+'<block type="new_containter">' +
+'<field name="NAME">Name</field>' +
+'<field name="NAME">0</field>' +
+'<field name="NAME">Name</field>' +
+'</block>' +
+'<block type="new_plate">' +
+'<field name="NAME">Name</field>' +
+'<field name="NAME">     </field>' +
+'</block>' +
+'</category>' +
+'<category name="Measurements" colour="#a5935b">' +
+'<block type="measure_fluids">' +
+'<field name="NAME">0</field>' +
+'</block>' +
+'<block type="measure_solid">' +
+'<field name="NAME">0</field>' +
+'<field name="NAME">Name</field>' +
+'</block>' +
+'<block type="measure_props">' +
+'<field name="NAME">0</field>' +
+'</block>' +
+'<block type="plate_out">' +
+'<field name="NAME">0</field>' +
+'</block>' +
+'<block type="transfer"></block>' +
+'</category>' +
+'<category name="Combination and Mixing" colour="#80a55b">' +
+'<block type="combine"></block>' +
+'<block type="dissolve"></block>' +
+'<block type="resuspend"></block>' +
+'<block type="incubate_and_mix">' +
+'<field name="NAME">0</field>' +
+'<field name="NAME">0</field>' +
+'<field name="NAME">0</field>' +
+'<field name="NAME">Name</field>' +
+'</block>' +
+'<block type="mixing_table">' +
+'<field name="NAME">0</field>' +
+'<field name="NAME">0</field>' +
+'</block>' +
+'</category>' +
+'<category name="Temperature and Storage" colour="#5ba580">' +
+'<block type="incubate1">' +
+'<field name="NAME">0</field>' +
+'<field name="NAME">0</field>' +
+'<field name="NAME">0</field>' +
+'</block>' +
+'<block type="inoculation">' +
+'<field name="NAME">0</field>' +
+'<field name="NAME">0</field>' +
+'<field name="NAME">0</field>' +
+'<field name="NAME">0</field>' +
+'<field name="NAME2">Name</field>' +
+'</block>' +
+'<block type="dry_pellet">' +
+'<field name="NAME">0</field>' +
+'<field name="NAME">Name</field>' +
+'</block>' +
+'</category>' +
+'<category name="Detection and Analysis" colour="#5b93a5">' +
+'<block type="facs"></block>' +
+'<block type="sequencing"></block>' +
+'<block type="electroporate">' +
+'<field name="NAME">0</field>' +
+'<field name="NAME">0</field>' +
+'</block>' +
+'<block type="weigh"></block>' +
+'<block type="cell_culture">' +
+'<field name="NAME">0</field>' +
+'<field name="NAME">0</field>' +
+'<field name="NAME">0</field>' +
+'<field name="NAME">0</field>' +
+'</block>' +
+'<block type="transfection"></block>' +
+'</category>';
 
 // The editor Toolbox. Add/Modify here if you want to change what blocks appear on the editor
 var starting_toolbox = '<xml xmlns="http://www.w3.org/1999/xhtml" id="toolbox" style="display: none;">' +
